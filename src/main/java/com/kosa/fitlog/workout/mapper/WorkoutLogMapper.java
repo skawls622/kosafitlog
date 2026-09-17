@@ -1,5 +1,7 @@
 package com.kosa.fitlog.workout.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -12,5 +14,12 @@ public interface WorkoutLogMapper {
 
     WorkoutLogDTO findByWorkoutLogIdAndMemberId(
             @Param("workoutLogId") Long workoutLogId,
+            @Param("memberId") Long memberId);
+
+    int completeWorkout(
+            @Param("workoutLogId") Long workoutLogId,
+            @Param("memberId") Long memberId);
+
+    List<WorkoutLogDTO> findAllByMemberId(
             @Param("memberId") Long memberId);
 }

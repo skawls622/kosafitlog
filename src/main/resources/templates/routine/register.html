@@ -2,24 +2,46 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 루틴 등록</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-    <h1>루틴 등록</h1>
-    <p th:if="${registerError}" th:text="${registerError}" style="color: red;"></p>
+    <div class="app-layout">
+        <aside th:replace="fragments/sidebar :: sidebar('routines')"></aside>
+        <main class="main-content">
+            <div class="content-shell narrow">
+                <header class="page-header">
+                    <div>
+                        <h1 class="page-title">새 루틴 만들기</h1>
+                        <p class="page-description">자주 수행할 운동 계획의 이름과 설명을 입력하세요.</p>
+                    </div>
+                </header>
 
-    <form th:action="@{/routine/register}" method="post">
-        <p>
-            <label for="routineName">루틴명</label>
-            <input id="routineName" name="routineName" type="text" maxlength="100" required>
-        </p>
-        <p>
-            <label for="description">설명</label>
-            <textarea id="description" name="description" maxlength="500"></textarea>
-        </p>
-        <button type="submit">등록</button>
-    </form>
+                <p class="alert" th:if="${registerError}" th:text="${registerError}"></p>
 
-    <p><a th:href="@{/routine/list}">목록으로 돌아가기</a></p>
+                <form class="card form-card" th:action="@{/routine/register}" method="post">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="routineName">루틴명</label>
+                            <input class="form-control" id="routineName" name="routineName"
+                                   type="text" maxlength="100" required
+                                   placeholder="예: PUSH DAY">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="description">설명</label>
+                            <textarea class="form-textarea" id="description" name="description"
+                                      maxlength="500"
+                                      placeholder="루틴의 목표나 구성을 간단히 적어주세요."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <a class="btn btn-secondary" th:href="@{/routine/list}">취소</a>
+                        <button class="btn btn-primary" type="submit">저장하기</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

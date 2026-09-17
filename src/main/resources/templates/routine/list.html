@@ -2,33 +2,48 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 루틴 목록</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-    <h1>내 루틴 목록</h1>
-    <p th:if="${param.notFound}" style="color: red;">루틴을 찾을 수 없습니다.</p>
-    <p><a th:href="@{/routine/register}">새 루틴 등록</a></p>
+    <div class="app-layout">
+        <aside th:replace="fragments/sidebar :: sidebar('routines')"></aside>
 
-    <p th:if="${#lists.isEmpty(routines)}">등록된 루틴이 없습니다.</p>
-    <table th:unless="${#lists.isEmpty(routines)}" border="1">
-        <thead>
-            <tr>
-                <th>루틴명</th>
-                <th>설명</th>
-                <th>등록일</th>
-                <th>상세</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="routine : ${routines}">
-                <td th:text="${routine.routineName}"></td>
-                <td th:text="${routine.description}"></td>
-                <td th:text="${routine.createdAt}"></td>
-                <td>
-                    <a th:href="@{/routine/read(routineId=${routine.routineId})}">상세보기</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+        <main class="main-content">
+            <div class="content-shell">
+                <header class="page-header">
+                    <div>
+                        <h1 class="page-title">내 루틴</h1>
+                        <p class="page-description">자주 하는 운동 구성을 루틴으로 저장하고 빠르게 시작하세요.</p>
+                    </div>
+                    <div class="page-actions">
+                        <a class="btn btn-primary" th:href="@{/routine/register}">+ 새 루틴</a>
+                    </div>
+                </header>
+
+                <p class="alert" th:if="${param.notFound}">루틴을 찾을 수 없습니다.</p>
+
+                <section class="card empty-state" th:if="${#lists.isEmpty(routines)}">
+                    <h2 class="empty-state-title">아직 등록된 루틴이 없습니다</h2>
+                    <p class="empty-state-text">새 루틴을 만들어 첫 운동 계획을 등록해보세요.</p>
+                </section>
+
+                <section class="routine-grid" th:unless="${#lists.isEmpty(routines)}">
+                    <article class="routine-card" th:each="routine : ${routines}">
+                        <h2 class="routine-card-title" th:text="${routine.routineName}"></h2>
+                        <p class="routine-card-description" th:text="${routine.description}"></p>
+                        <div class="routine-card-footer">
+                            <span class="date-text" th:text="${routine.createdAt}"></span>
+                            <a class="text-link"
+                               th:href="@{/routine/read(routineId=${routine.routineId})}">
+                                상세보기 →
+                            </a>
+                        </div>
+                    </article>
+                </section>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

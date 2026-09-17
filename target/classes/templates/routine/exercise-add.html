@@ -2,41 +2,54 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 운동 추가</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-    <h1>운동 추가</h1>
-    <h2 th:text="${routine.routineName}"></h2>
-    <p th:if="${exerciseError}" th:text="${exerciseError}" style="color: red;"></p>
+    <div class="app-layout">
+        <aside th:replace="fragments/sidebar :: sidebar('routines')"></aside>
+        <main class="main-content">
+            <div class="content-shell">
+                <header class="page-header">
+                    <div>
+                        <h1 class="page-title">운동 추가</h1>
+                        <p class="page-description">
+                            <strong th:text="${routine.routineName}"></strong>에 추가할 운동을 선택하세요.
+                        </p>
+                    </div>
+                    <div class="page-actions">
+                        <a class="btn btn-secondary"
+                           th:href="@{/routine/read(routineId=${routine.routineId})}">
+                            루틴 상세로 돌아가기
+                        </a>
+                    </div>
+                </header>
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>운동명</th>
-                <th>부위</th>
-                <th>설명</th>
-                <th>추가</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="exercise : ${exercises}">
-                <td th:text="${exercise.exerciseName}"></td>
-                <td th:text="${exercise.bodyPart}"></td>
-                <td th:text="${exercise.description}"></td>
-                <td>
-                    <form th:action="@{/routine/exercise/add}" method="post">
-                        <input type="hidden" name="routineId" th:value="${routine.routineId}">
-                        <input type="hidden" name="exerciseId" th:value="${exercise.exerciseId}">
-                        <input type="text" name="memo" maxlength="500" placeholder="메모 (선택)">
-                        <button type="submit">추가</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                <p class="alert" th:if="${exerciseError}" th:text="${exerciseError}"></p>
 
-    <p>
-        <a th:href="@{/routine/read(routineId=${routine.routineId})}">루틴 상세로 돌아가기</a>
-    </p>
+                <section class="exercise-catalog">
+                    <article class="exercise-catalog-row" th:each="exercise : ${exercises}">
+                        <div>
+                            <span class="badge badge-muted" th:text="${exercise.bodyPart}"></span>
+                            <strong class="exercise-name"
+                                    th:text="${exercise.exerciseName}"></strong>
+                        </div>
+                        <p class="exercise-memo" th:text="${exercise.description}"></p>
+                        <form class="exercise-add-form"
+                              th:action="@{/routine/exercise/add}" method="post">
+                            <input type="hidden" name="routineId"
+                                   th:value="${routine.routineId}">
+                            <input type="hidden" name="exerciseId"
+                                   th:value="${exercise.exerciseId}">
+                            <input class="form-control" type="text" name="memo"
+                                   maxlength="500" placeholder="메모 (선택)">
+                            <button class="btn btn-primary" type="submit">추가</button>
+                        </form>
+                    </article>
+                </section>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

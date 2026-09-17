@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.kosa.fitlog.member.controller.MemberLoginControllerTests
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.601 s - in com.kosa.fitlog.member.controller.MemberLoginControllerTests
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.546 s - in com.kosa.fitlog.member.controller.MemberLoginControllerTests

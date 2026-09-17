@@ -32,4 +32,18 @@
         WHERE workout_log_id = #{workoutLogId}
           AND member_id = #{memberId}
     </select>
+
+    <update id="completeWorkout">
+        UPDATE workout_logs
+        SET updated_at = SYSDATE
+        WHERE workout_log_id = #{workoutLogId}
+          AND member_id = #{memberId}
+    </update>
+
+    <select id="findAllByMemberId" resultMap="workoutLogResultMap">
+        SELECT workout_log_id, member_id, workout_date, memo, created_at, updated_at
+        FROM workout_logs
+        WHERE member_id = #{memberId}
+        ORDER BY workout_date DESC, workout_log_id DESC
+    </select>
 </mapper>

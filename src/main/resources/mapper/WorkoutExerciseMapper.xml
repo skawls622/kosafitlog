@@ -42,4 +42,14 @@
         WHERE we.workout_log_id = #{workoutLogId}
         ORDER BY we.exercise_order
     </select>
+
+    <select id="countOwnedWorkoutExercise" resultType="int">
+        SELECT COUNT(*)
+        FROM workout_exercises we
+        JOIN workout_logs wl
+          ON wl.workout_log_id = we.workout_log_id
+        WHERE we.workout_exercise_id = #{workoutExerciseId}
+          AND we.workout_log_id = #{workoutLogId}
+          AND wl.member_id = #{memberId}
+    </select>
 </mapper>

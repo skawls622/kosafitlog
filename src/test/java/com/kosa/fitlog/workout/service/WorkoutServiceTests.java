@@ -139,6 +139,45 @@ class WorkoutServiceTests {
         assertThat(service().getWorkoutExercises(100L)).containsExactly(exercise);
     }
 
+    @Test
+    void ownWorkoutCanBeCompletedWithBothOwnershipValues() {
+        when(workoutLogMapper.findByWorkoutLogIdAndMemberId(100L, 10L))
+                .thenReturn(new WorkoutLogDTO());
+        when(workoutLogMapper.completeWorkout(100L, 10L)).thenReturn(1);
+
+        assertThat(service().completeWorkout(100L, 10L)).isTrue();
+        verify(workoutLogMapper).findByWorkoutLogIdAndMemberId(100L, 10L);
+        verify(workoutLogMapper).completeWorkout(100L, 10L);
+    }
+
+    @Test
+    void anotherMembersWorkoutCannotBeCompleted() {
+        when(workoutLogMapper.findByWorkoutLogIdAndMemberId(100L, 99L))
+                .thenReturn(null);
+
+        assertThat(service().completeWorkout(100L, 99L)).isFalse();
+        verify(workoutLogMapper, never()).completeWorkout(any(), any());
+    }
+
+    @Test
+    void missingWorkoutCannotBeCompleted() {
+        when(workoutLogMapper.findByWorkoutLogIdAndMemberId(999L, 10L))
+                .thenReturn(null);
+
+        assertThat(service().completeWorkout(999L, 10L)).isFalse();
+        verify(workoutLogMapper, never()).completeWorkout(any(), any());
+    }
+
+    @Test
+    void workoutListUsesMemberIdMapperCondition() {
+        WorkoutLogDTO log = new WorkoutLogDTO();
+        when(workoutLogMapper.findAllByMemberId(10L))
+                .thenReturn(Arrays.asList(log));
+
+        assertThat(service().getWorkoutLogs(10L)).containsExactly(log);
+        verify(workoutLogMapper).findAllByMemberId(10L);
+    }
+
     private RoutineExerciseDTO routineExercise(Long exerciseId,
             Integer exerciseOrder, String memo) {
         RoutineExerciseDTO exercise = new RoutineExerciseDTO();

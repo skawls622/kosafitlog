@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside class="sidebar" th:fragment="sidebar(activePage)">
+        <a class="sidebar-logo" th:href="@{/routine/list}">kosaFitLog!</a>
+
+        <nav class="sidebar-nav" aria-label="주요 메뉴">
+            <a class="nav-item"
+               th:classappend="${activePage == 'routines'} ? ' active' : ''"
+               th:href="@{/routine/list}">
+                <span class="nav-icon" aria-hidden="true">▣</span>
+                <span>내 루틴</span>
+            </a>
+            <a class="nav-item"
+               th:classappend="${activePage == 'workouts'} ? ' active' : ''"
+               th:href="@{/workout/list}">
+                <span class="nav-icon" aria-hidden="true">◷</span>
+                <span>운동 기록</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <span class="sidebar-user-name"
+                  th:text="${session.loginMember.nickname} + ' 님'">회원 님</span>
+            <form th:action="@{/member/logout}" method="post">
+                <button class="sidebar-logout" type="submit">로그아웃</button>
+            </form>
+        </div>
+    </aside>
+</body>
+</html>

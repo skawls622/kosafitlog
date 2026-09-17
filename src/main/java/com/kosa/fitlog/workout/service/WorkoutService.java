@@ -1,5 +1,6 @@
 package com.kosa.fitlog.workout.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -75,5 +76,21 @@ public class WorkoutService {
 
     public List<WorkoutExerciseDTO> getWorkoutExercises(Long workoutLogId) {
         return workoutExerciseMapper.findByWorkoutLogId(workoutLogId);
+    }
+
+    public boolean completeWorkout(Long workoutLogId, Long memberId) {
+        if (workoutLogId == null || memberId == null
+                || workoutLogMapper.findByWorkoutLogIdAndMemberId(
+                        workoutLogId, memberId) == null) {
+            return false;
+        }
+        return workoutLogMapper.completeWorkout(workoutLogId, memberId) == 1;
+    }
+
+    public List<WorkoutLogDTO> getWorkoutLogs(Long memberId) {
+        if (memberId == null) {
+            return Collections.emptyList();
+        }
+        return workoutLogMapper.findAllByMemberId(memberId);
     }
 }

@@ -1,5 +1,8 @@
 package com.kosa.fitlog.workout.controller;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -12,17 +15,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.kosa.fitlog.member.dto.LoginMember;
+import com.kosa.fitlog.workout.dto.WorkoutExerciseDTO;
 import com.kosa.fitlog.workout.dto.WorkoutLogDTO;
 import com.kosa.fitlog.workout.service.WorkoutService;
+import com.kosa.fitlog.workout.service.WorkoutSetService;
 
 @Controller
 @RequestMapping("/workout")
 public class WorkoutController {
 
     private final WorkoutService workoutService;
+    private final WorkoutSetService workoutSetService;
 
-    public WorkoutController(WorkoutService workoutService) {
+    public WorkoutController(WorkoutService workoutService,
+            WorkoutSetService workoutSetService) {
         this.workoutService = workoutService;
+        this.workoutSetService = workoutSetService;
     }
 
     @PostMapping("/start")
@@ -65,10 +73,97 @@ public class WorkoutController {
             return "redirect:/routine/list?notFound";
         }
 
+        List<WorkoutExerciseDTO> workoutExercises =
+                workoutService.getWorkoutExercises(workoutLogId);
         model.addAttribute("workoutLog", workoutLog);
-        model.addAttribute("workoutExercises",
-                workoutService.getWorkoutExercises(workoutLogId));
+        model.addAttribute("workoutExercises", workoutExercises);
+        model.addAttribute("workoutSetsByExerciseId",
+                workoutSetService.getSetsByWorkoutExercises(workoutExercises));
         return "workout/record";
+    }
+
+    @PostMapping("/complete")
+    public String complete(@RequestParam("workoutLogId") Long workoutLogId,
+            HttpServletRequest request) {
+        LoginMember loginMember = getLoginMember(request);
+        if (loginMember == null) {
+            return "redirect:/member/login";
+        }
+
+        boolean completed = workoutService.completeWorkout(
+                workoutLogId, loginMember.getMemberId());
+        if (!completed) {
+            return "redirect:/workout/list?notFound";
+        }
+        return "redirect:/workout/list";
+    }
+
+    @GetMapping("/list")
+    public String list(HttpServletRequest request, Model model) {
+        LoginMember loginMember = getLoginMember(request);
+        if (loginMember == null) {
+            return "redirect:/member/login";
+        }
+
+        model.addAttribute("workoutLogs",
+                workoutService.getWorkoutLogs(loginMember.getMemberId()));
+        return "workout/list";
+    }
+
+    @PostMapping("/set/add")
+    public String addSet(
+            @RequestParam("workoutLogId") Long workoutLogId,
+            @RequestParam("workoutExerciseId") Long workoutExerciseId,
+            @RequestParam(value = "weight", required = false) BigDecimal weight,
+            @RequestParam("reps") Integer reps,
+            @RequestParam(value = "memo", required = false) String memo,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        LoginMember loginMember = getLoginMember(request);
+        if (loginMember == null) {
+            return "redirect:/member/login";
+        }
+
+        try {
+            boolean added = workoutSetService.add(
+                    loginMember.getMemberId(), workoutLogId,
+                    workoutExerciseId, weight, reps, memo);
+            if (!added) {
+                return "redirect:/routine/list?notFound";
+            }
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("setError", exception.getMessage());
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "setError", "세트 저장 중 오류가 발생했습니다.");
+        }
+        return "redirect:/workout/record?workoutLogId=" + workoutLogId;
+    }
+
+    @PostMapping("/set/remove")
+    public String removeSet(
+            @RequestParam("workoutLogId") Long workoutLogId,
+            @RequestParam("workoutExerciseId") Long workoutExerciseId,
+            @RequestParam("workoutSetId") Long workoutSetId,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        LoginMember loginMember = getLoginMember(request);
+        if (loginMember == null) {
+            return "redirect:/member/login";
+        }
+
+        try {
+            boolean removed = workoutSetService.remove(
+                    loginMember.getMemberId(), workoutLogId,
+                    workoutExerciseId, workoutSetId);
+            if (!removed) {
+                return "redirect:/routine/list?notFound";
+            }
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute(
+                    "setError", "세트 삭제 중 오류가 발생했습니다.");
+        }
+        return "redirect:/workout/record?workoutLogId=" + workoutLogId;
     }
 
     private LoginMember getLoginMember(HttpServletRequest request) {

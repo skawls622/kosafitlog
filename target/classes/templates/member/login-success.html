@@ -2,14 +2,26 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 로그인 성공</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-    <h1>로그인 성공</h1>
-    <p>아이디: <span th:text="${loginMember.loginId}"></span></p>
-    <p>닉네임: <span th:text="${loginMember.nickname}"></span></p>
-    <form th:action="@{/member/logout}" method="post">
-        <button type="submit">로그아웃</button>
-    </form>
+    <main class="simple-auth-page">
+        <section class="auth-card">
+            <span class="badge badge-success">로그인 완료</span>
+            <h1 class="auth-title">환영합니다</h1>
+            <p class="auth-description">
+                아이디: <span th:text="${loginMember.loginId}"></span><br>
+                닉네임: <span th:text="${loginMember.nickname}"></span>
+            </p>
+            <div class="button-row">
+                <a class="btn btn-primary" th:href="@{/routine/list}">내 루틴으로 이동</a>
+                <form th:action="@{/member/logout}" method="post">
+                    <button class="btn btn-secondary" type="submit">로그아웃</button>
+                </form>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

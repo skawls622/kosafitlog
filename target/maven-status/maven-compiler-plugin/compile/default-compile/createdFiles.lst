@@ -5,10 +5,13 @@ com\kosa\fitlog\workout\mapper\WorkoutExerciseMapper.class
 com\kosa\fitlog\exercise\mapper\ExerciseMapper.class
 com\kosa\fitlog\workout\service\WorkoutService.class
 com\kosa\fitlog\member\service\MemberService.class
+com\kosa\fitlog\workout\dto\WorkoutSetDTO.class
 com\kosa\fitlog\member\dto\MemberDTO.class
 com\kosa\fitlog\member\mapper\MemberMapper.class
 com\kosa\fitlog\exercise\dto\ExerciseDTO.class
+com\kosa\fitlog\workout\mapper\WorkoutSetMapper.class
 com\kosa\fitlog\routine\mapper\RoutineMapper.class
+com\kosa\fitlog\workout\service\WorkoutSetService.class
 com\kosa\fitlog\workout\mapper\WorkoutLogMapper.class
 com\kosa\fitlog\member\dto\LoginMember.class
 com\kosa\fitlog\routine\controller\RoutineController.class

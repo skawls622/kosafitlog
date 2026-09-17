@@ -14,4 +14,9 @@ public interface WorkoutExerciseMapper {
 
     List<WorkoutExerciseDTO> findByWorkoutLogId(
             @Param("workoutLogId") Long workoutLogId);
+
+    int countOwnedWorkoutExercise(
+            @Param("workoutExerciseId") Long workoutExerciseId,
+            @Param("workoutLogId") Long workoutLogId,
+            @Param("memberId") Long memberId);
 }

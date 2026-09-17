@@ -1,5 +1,6 @@
 com\kosa\fitlog\member\controller\MemberLoginControllerTests.class
 com\kosa\fitlog\routine\service\RoutineServiceTests.class
+com\kosa\fitlog\workout\service\WorkoutSetServiceTests.class
 com\kosa\fitlog\routine\service\RoutineExerciseServiceTests.class
 com\kosa\fitlog\member\service\MemberServiceTests.class
 com\kosa\fitlog\workout\controller\WorkoutControllerTests.class

@@ -2,22 +2,53 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 로그인</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-    <h1>로그인</h1>
-    <p th:if="${loginError}" style="color: red;">아이디 또는 비밀번호가 올바르지 않습니다.</p>
+    <main class="auth-shell">
+        <section class="auth-brand" aria-label="kosaFitLog 소개">
+            <div class="auth-brand-inner">
+                <span class="auth-kicker">PERSONAL FITNESS LOG</span>
+                <h1 class="auth-logo">kosaFitLog!</h1>
+                <p class="auth-slogan">오늘의 한 세트를<br>내일의 성장으로.</p>
+                <p class="auth-copy">루틴과 운동 기록을 한곳에 모아<br>나만의 운동 흐름을 만들어보세요.</p>
+                <div class="auth-accent" aria-hidden="true"></div>
+            </div>
+        </section>
 
-    <form th:action="@{/member/login}" method="post">
-        <p>
-            <label for="loginId">아이디</label>
-            <input id="loginId" name="loginId" type="text" maxlength="50" required>
-        </p>
-        <p>
-            <label for="password">비밀번호</label>
-            <input id="password" name="password" type="password" required>
-        </p>
-        <button type="submit">로그인</button>
-    </form>
+        <section class="auth-main">
+            <div class="auth-card">
+                <h2 class="auth-title">다시 만나서 반가워요</h2>
+                <p class="auth-description">로그인하고 오늘의 운동을 기록해보세요.</p>
+
+                <p class="alert" th:if="${loginError}">
+                    아이디 또는 비밀번호가 올바르지 않습니다.
+                </p>
+
+                <form class="form-grid" th:action="@{/member/login}" method="post">
+                    <div class="form-group">
+                        <label class="form-label" for="loginId">아이디</label>
+                        <input class="form-control" id="loginId" name="loginId"
+                               type="text" maxlength="50" required
+                               placeholder="아이디를 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">비밀번호</label>
+                        <input class="form-control" id="password" name="password"
+                               type="password" required
+                               placeholder="비밀번호를 입력하세요">
+                    </div>
+                    <button class="btn btn-primary btn-block" type="submit">로그인</button>
+                </form>
+
+                <p class="auth-footer">
+                    처음이신가요?
+                    <a th:href="@{/member/signup}">회원가입</a>
+                </p>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
