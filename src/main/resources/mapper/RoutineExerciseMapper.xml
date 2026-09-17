@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosa.fitlog.routine.mapper.RoutineExerciseMapper">
+
+    <resultMap id="routineExerciseResultMap"
+            type="com.kosa.fitlog.routine.dto.RoutineExerciseDTO">
+        <id property="routineExerciseId" column="routine_exercise_id"/>
+        <result property="routineId" column="routine_id"/>
+        <result property="exerciseId" column="exercise_id"/>
+        <result property="exerciseName" column="exercise_name"/>
+        <result property="bodyPart" column="body_part"/>
+        <result property="exerciseOrder" column="exercise_order"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+
+    <select id="findByRoutineId" resultMap="routineExerciseResultMap">
+        SELECT re.routine_exercise_id,
+               re.routine_id,
+               re.exercise_id,
+               e.exercise_name,
+               e.body_part,
+               re.exercise_order,
+               re.memo
+        FROM routine_exercises re
+        JOIN exercises e
+          ON e.exercise_id = re.exercise_id
+        WHERE re.routine_id = #{routineId}
+        ORDER BY re.exercise_order
+    </select>
+
+    <select id="findNextExerciseOrder" resultType="int">
+        SELECT NVL(MAX(exercise_order), 0) + 1
+        FROM routine_exercises
+        WHERE routine_id = #{routineId}
+    </select>
+
+    <insert id="insertRoutineExercise"
+            parameterType="com.kosa.fitlog.routine.dto.RoutineExerciseDTO">
+        INSERT INTO routine_exercises (
+            routine_exercise_id, routine_id, exercise_id, exercise_order, memo
+        )
+        VALUES (
+            SEQ_ROUTINE_EXERCISES.NEXTVAL,
+            #{routineId},
+            #{exerciseId},
+            #{exerciseOrder},
+            #{memo,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <delete id="deleteRoutineExercise">
+        DELETE FROM routine_exercises
+        WHERE routine_exercise_id = #{routineExerciseId}
+          AND routine_id = #{routineId}
+          AND EXISTS (
+              SELECT 1
+              FROM routines r
+              WHERE r.routine_id = routine_exercises.routine_id
+                AND r.member_id = #{memberId}
+          )
+    </delete>
+
+    <delete id="deleteAllByRoutineId">
+        DELETE FROM routine_exercises
+        WHERE routine_id = #{routineId}
+    </delete>
+</mapper>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 루틴 상세</title>
+</head>
+<body>
+    <h1>루틴 상세</h1>
+    <p th:if="${startError}" th:text="${startError}"></p>
+    <p>루틴명: <span th:text="${routine.routineName}"></span></p>
+    <p>설명: <span th:text="${routine.description}"></span></p>
+    <p>
+        등록일:
+        <span th:text="${routine.createdAt}"></span>
+    </p>
+
+    <form th:action="@{/workout/start}" method="post"
+          onsubmit="return confirm('이 루틴으로 운동을 시작하시겠습니까?');">
+        <input type="hidden" name="routineId" th:value="${routine.routineId}">
+        <button type="submit">이 루틴으로 운동 시작</button>
+    </form>
+
+    <p>
+        <a th:href="@{/routine/modify(routineId=${routine.routineId})}">수정</a>
+    </p>
+    <form th:action="@{/routine/remove}" method="post"
+          onsubmit="return confirm('루틴이 삭제됩니다. 삭제하시겠습니까?');">
+        <input type="hidden" name="routineId" th:value="${routine.routineId}">
+        <button type="submit">삭제</button>
+    </form>
+
+    <h2>구성 운동</h2>
+    <p th:if="${#lists.isEmpty(routineExercises)}">아직 등록된 운동이 없습니다.</p>
+    <ol th:unless="${#lists.isEmpty(routineExercises)}">
+        <li th:each="routineExercise : ${routineExercises}">
+            <strong th:text="${routineExercise.exerciseName}"></strong>
+            <span th:text="${routineExercise.bodyPart}"></span>
+            <span th:if="${routineExercise.memo}" th:text="${routineExercise.memo}"></span>
+            <form th:action="@{/routine/exercise/remove}" method="post"
+                  style="display: inline;"
+                  onsubmit="return confirm('루틴에서 이 운동을 제거하시겠습니까?');">
+                <input type="hidden" name="routineId" th:value="${routine.routineId}">
+                <input type="hidden" name="routineExerciseId"
+                       th:value="${routineExercise.routineExerciseId}">
+                <button type="submit">제거</button>
+            </form>
+        </li>
+    </ol>
+    <p>
+        <a th:href="@{/routine/exercise/add(routineId=${routine.routineId})}">운동 추가</a>
+    </p>
+    <p><a th:href="@{/routine/list}">목록으로 돌아가기</a></p>
+</body>
+</html>

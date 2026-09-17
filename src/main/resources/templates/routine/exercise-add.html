@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 운동 추가</title>
+</head>
+<body>
+    <h1>운동 추가</h1>
+    <h2 th:text="${routine.routineName}"></h2>
+    <p th:if="${exerciseError}" th:text="${exerciseError}" style="color: red;"></p>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>운동명</th>
+                <th>부위</th>
+                <th>설명</th>
+                <th>추가</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="exercise : ${exercises}">
+                <td th:text="${exercise.exerciseName}"></td>
+                <td th:text="${exercise.bodyPart}"></td>
+                <td th:text="${exercise.description}"></td>
+                <td>
+                    <form th:action="@{/routine/exercise/add}" method="post">
+                        <input type="hidden" name="routineId" th:value="${routine.routineId}">
+                        <input type="hidden" name="exerciseId" th:value="${exercise.exerciseId}">
+                        <input type="text" name="memo" maxlength="500" placeholder="메모 (선택)">
+                        <button type="submit">추가</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <a th:href="@{/routine/read(routineId=${routine.routineId})}">루틴 상세로 돌아가기</a>
+    </p>
+</body>
+</html>

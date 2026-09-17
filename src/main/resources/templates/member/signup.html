@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 회원가입</title>
+</head>
+<body>
+    <h1>회원가입</h1>
+    <p th:if="${signupSuccess}">회원가입이 완료되었습니다.</p>
+    <p th:if="${signupError}" th:text="${signupError}" style="color: red;"></p>
+
+    <form th:action="@{/member/signup}" method="post">
+        <p>
+            <label for="loginId">아이디</label>
+            <input id="loginId" name="loginId" type="text" maxlength="50" required>
+        </p>
+        <p>
+            <label for="password">비밀번호</label>
+            <input id="password" name="password" type="password" required autocomplete="new-password">
+        </p>
+        <p>
+            <label for="nickname">닉네임</label>
+            <input id="nickname" name="nickname" type="text" maxlength="30" required>
+        </p>
+        <p>
+            <label for="email">이메일 (선택)</label>
+            <input id="email" name="email" type="email" maxlength="100">
+        </p>
+        <button type="submit">가입하기</button>
+    </form>
+</body>
+</html>

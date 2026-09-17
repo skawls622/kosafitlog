@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 운동 기록</title>
+</head>
+<body>
+    <h1>운동 기록</h1>
+    <p>운동일: <span th:text="${workoutLog.workoutDate}"></span></p>
+
+    <h2>운동 종목</h2>
+    <ol>
+        <li th:each="workoutExercise : ${workoutExercises}">
+            <strong th:text="${workoutExercise.exerciseName}"></strong>
+            <span th:text="${workoutExercise.bodyPart}"></span>
+            <p th:if="${workoutExercise.memo}">
+                메모: <span th:text="${workoutExercise.memo}"></span>
+            </p>
+            <p>세트 기록 기능은 다음 단계에서 구현합니다.</p>
+        </li>
+    </ol>
+
+    <p><a th:href="@{/routine/list}">루틴 목록으로 돌아가기</a></p>
+</body>
+</html>

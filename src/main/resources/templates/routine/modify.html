@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 루틴 수정</title>
+</head>
+<body>
+    <h1>루틴 수정</h1>
+    <p th:if="${modifyError}" th:text="${modifyError}" style="color: red;"></p>
+
+    <form th:action="@{/routine/modify}" method="post">
+        <input type="hidden" name="routineId" th:value="${routine.routineId}">
+        <p>
+            <label for="routineName">루틴명</label>
+            <input id="routineName" name="routineName" type="text"
+                   maxlength="100" required th:value="${routine.routineName}">
+        </p>
+        <p>
+            <label for="description">설명</label>
+            <textarea id="description" name="description"
+                      maxlength="500" th:text="${routine.description}"></textarea>
+        </p>
+        <button type="submit">수정 완료</button>
+    </form>
+
+    <p>
+        <a th:href="@{/routine/read(routineId=${routine.routineId})}">상세로 돌아가기</a>
+    </p>
+</body>
+</html>

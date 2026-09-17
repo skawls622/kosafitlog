@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 로그인 성공</title>
+</head>
+<body>
+    <h1>로그인 성공</h1>
+    <p>아이디: <span th:text="${loginMember.loginId}"></span></p>
+    <p>닉네임: <span th:text="${loginMember.nickname}"></span></p>
+    <form th:action="@{/member/logout}" method="post">
+        <button type="submit">로그아웃</button>
+    </form>
+</body>
+</html>

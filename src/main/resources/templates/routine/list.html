@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>kosaFitLog 루틴 목록</title>
+</head>
+<body>
+    <h1>내 루틴 목록</h1>
+    <p th:if="${param.notFound}" style="color: red;">루틴을 찾을 수 없습니다.</p>
+    <p><a th:href="@{/routine/register}">새 루틴 등록</a></p>
+
+    <p th:if="${#lists.isEmpty(routines)}">등록된 루틴이 없습니다.</p>
+    <table th:unless="${#lists.isEmpty(routines)}" border="1">
+        <thead>
+            <tr>
+                <th>루틴명</th>
+                <th>설명</th>
+                <th>등록일</th>
+                <th>상세</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="routine : ${routines}">
+                <td th:text="${routine.routineName}"></td>
+                <td th:text="${routine.description}"></td>
+                <td th:text="${routine.createdAt}"></td>
+                <td>
+                    <a th:href="@{/routine/read(routineId=${routine.routineId})}">상세보기</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

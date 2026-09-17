@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosa.fitlog.workout.mapper.WorkoutExerciseMapper">
+
+    <resultMap id="workoutExerciseResultMap"
+            type="com.kosa.fitlog.workout.dto.WorkoutExerciseDTO">
+        <id property="workoutExerciseId" column="workout_exercise_id"/>
+        <result property="workoutLogId" column="workout_log_id"/>
+        <result property="exerciseId" column="exercise_id"/>
+        <result property="exerciseName" column="exercise_name"/>
+        <result property="bodyPart" column="body_part"/>
+        <result property="exerciseOrder" column="exercise_order"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+
+    <insert id="insertWorkoutExercise"
+            parameterType="com.kosa.fitlog.workout.dto.WorkoutExerciseDTO">
+        INSERT INTO workout_exercises (
+            workout_exercise_id, workout_log_id, exercise_id, exercise_order, memo
+        )
+        VALUES (
+            SEQ_WORKOUT_EXERCISES.NEXTVAL,
+            #{workoutLogId},
+            #{exerciseId},
+            #{exerciseOrder},
+            #{memo,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="findByWorkoutLogId" resultMap="workoutExerciseResultMap">
+        SELECT we.workout_exercise_id,
+               we.workout_log_id,
+               we.exercise_id,
+               e.exercise_name,
+               e.body_part,
+               we.exercise_order,
+               we.memo
+        FROM workout_exercises we
+        JOIN exercises e
+          ON e.exercise_id = we.exercise_id
+        WHERE we.workout_log_id = #{workoutLogId}
+        ORDER BY we.exercise_order
+    </select>
+</mapper>
