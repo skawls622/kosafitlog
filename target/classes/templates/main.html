@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kosaFitLog 메인</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <div class="landing-page">
+        <header class="landing-header">
+            <div class="landing-shell landing-header-inner">
+                <a class="landing-logo" th:href="@{/main}">kosaFitLog!</a>
+                <nav class="landing-nav" aria-label="회원 메뉴"
+                     th:if="${session.loginMember == null}">
+                    <a class="btn btn-secondary" th:href="@{/member/login}">로그인</a>
+                    <a class="btn btn-primary" th:href="@{/member/signup}">회원가입</a>
+                </nav>
+                <div class="landing-member-menu" th:if="${session.loginMember != null}">
+                    <span class="landing-welcome">
+                        안녕하세요, <strong th:text="${session.loginMember.nickname}">회원</strong>님
+                    </span>
+                    <form th:action="@{/member/logout}" method="post">
+                        <button class="btn btn-secondary" type="submit">로그아웃</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="landing-hero">
+                <div class="landing-shell landing-hero-inner">
+                    <p class="landing-kicker">PERSONAL FITNESS LOG</p>
+                    <h1 class="landing-title">
+                        기록을 쌓고,<br>
+                        나만의 운동 루틴을 완성하세요.
+                    </h1>
+                    <p class="landing-description">
+                        루틴을 만들고 세트별 중량과 횟수를 기록해<br>
+                        나의 운동 이력을 관리할 수 있습니다.
+                    </p>
+                    <a class="btn btn-primary landing-cta" th:href="@{/member/login}"
+                       th:if="${session.loginMember == null}">운동 시작하기</a>
+                </div>
+            </section>
+
+            <section class="landing-features" aria-label="주요 기능">
+                <div class="landing-shell main-card-grid">
+                    <article class="card main-feature-card">
+                        <span class="main-feature-icon" aria-hidden="true">▣</span>
+                        <h2 class="main-feature-title">나만의 운동 루틴</h2>
+                        <p class="main-feature-description">
+                            원하는 운동을 조합해 나만의 루틴을 구성합니다.
+                        </p>
+                        <a class="btn btn-primary" th:href="@{/routine/list}"
+                           th:if="${session.loginMember != null}">내 루틴 보기</a>
+                    </article>
+
+                    <article class="card main-feature-card">
+                        <span class="main-feature-icon" aria-hidden="true">◷</span>
+                        <h2 class="main-feature-title">운동 기록</h2>
+                        <p class="main-feature-description">
+                            세트별 중량과 횟수를 기록하고 지난 운동을 확인합니다.
+                        </p>
+                        <a class="btn btn-secondary" th:href="@{/workout/list}"
+                           th:if="${session.loginMember != null}">운동 기록 보기</a>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

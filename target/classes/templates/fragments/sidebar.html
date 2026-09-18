@@ -6,6 +6,12 @@
 
         <nav class="sidebar-nav" aria-label="주요 메뉴">
             <a class="nav-item"
+               th:classappend="${activePage == 'main'} ? ' active' : ''"
+               th:href="@{/main}">
+                <span class="nav-icon" aria-hidden="true">⌂</span>
+                <span>메인</span>
+            </a>
+            <a class="nav-item"
                th:classappend="${activePage == 'routines'} ? ' active' : ''"
                th:href="@{/routine/list}">
                 <span class="nav-icon" aria-hidden="true">▣</span>
