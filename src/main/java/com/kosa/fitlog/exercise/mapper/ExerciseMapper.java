@@ -10,7 +10,7 @@ import com.kosa.fitlog.exercise.dto.ExerciseDTO;
 @Mapper
 public interface ExerciseMapper {
 
-    List<ExerciseDTO> findAll();
+	List<ExerciseDTO> findAll();
 
-    ExerciseDTO findById(@Param("exerciseId") Long exerciseId);
+	ExerciseDTO findById(@Param("exerciseId") Long exerciseId);
 }

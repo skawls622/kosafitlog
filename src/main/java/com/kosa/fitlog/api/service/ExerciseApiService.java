@@ -41,12 +41,41 @@ public class ExerciseApiService {
 						);
 		
 		ExerciseApiDTO[] body = response.getBody();
+		
 		if (body == null) {
 		    return Collections.emptyList();
 		}
 		
 		return Arrays.asList(body);
 		
+	}
+	
+	public List<ExerciseApiDTO> searchByName(String name) {
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.set("X-Api-Key", apiKey);
+
+	    HttpEntity<String> entity = new HttpEntity<>(headers);
+
+	    RestTemplate restTemplate = new RestTemplate();
+
+	    String url = "https://api.api-ninjas.com/v1/exercises?name=" + name;
+
+	    ResponseEntity<ExerciseApiDTO[]> response =
+	            restTemplate.exchange(
+	                    url,
+	                    HttpMethod.GET,
+	                    entity,
+	                    ExerciseApiDTO[].class
+	            );
+
+	    ExerciseApiDTO[] body = response.getBody();
+
+	    if (body == null) {
+	        return Collections.emptyList();
+	    }
+
+	    return Arrays.asList(body);
 	}
 	
 	

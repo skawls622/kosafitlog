@@ -1,25 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kosa.fitlog.exercise.mapper.ExerciseMapper">
 
-    <resultMap id="exerciseResultMap" type="com.kosa.fitlog.exercise.dto.ExerciseDTO">
-        <id property="exerciseId" column="exercise_id"/>
-        <result property="exerciseName" column="exercise_name"/>
-        <result property="bodyPart" column="body_part"/>
-        <result property="description" column="description"/>
-        <result property="createdAt" column="created_at"/>
-    </resultMap>
+	<resultMap id="exerciseResultMap"
+		type="com.kosa.fitlog.exercise.dto.ExerciseDTO">
+		<id property="exerciseId" column="exercise_id" />
+		<result property="exerciseName" column="exercise_name" />
+		<result property="bodyPart" column="body_part" />
+		<result property="description" column="description" />
+		<result property="apikeyword" column="api_keyword" />
+		<result property="createdAt" column="created_at" />
+	</resultMap>
 
-    <select id="findAll" resultMap="exerciseResultMap">
-        SELECT exercise_id, exercise_name, body_part, description, created_at
-        FROM exercises
-        ORDER BY body_part, exercise_name
-    </select>
+	<select id="findAll" resultMap="exerciseResultMap">
+			SELECT exercise_id, 
+			exercise_name, 
+			body_part, 
+			description,
+			api_keyword, 
+			created_at
+		FROM exercises
+		ORDER BY body_part, exercise_name
+	</select>
 
-    <select id="findById" resultMap="exerciseResultMap">
-        SELECT exercise_id, exercise_name, body_part, description, created_at
-        FROM exercises
-        WHERE exercise_id = #{exerciseId}
-    </select>
+	<select id="findById" resultMap="exerciseResultMap">
+			SELECT exercise_id, 
+			exercise_name, 
+			body_part, 
+			description,
+			api_keyword, 
+			created_at
+		FROM exercises
+		WHERE exercise_id = #{exerciseId}
+	</select>
 </mapper>
