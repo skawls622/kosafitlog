@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kosa.fitlog.bodycomposition.mapper.BodyCompositionMapper">
+
+    <resultMap id="bodyCompositionResultMap"
+            type="com.kosa.fitlog.bodycomposition.dto.BodyCompositionDTO">
+        <id property="bodyCompositionId" column="body_composition_id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="measuredDate" column="measured_date"/>
+        <result property="weight" column="weight"/>
+        <result property="skeletalMuscle" column="skeletal_muscle"/>
+        <result property="bodyFatPercentage" column="body_fat_percentage"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.kosa.fitlog.bodycomposition.dto.BodyCompositionDTO">
+        INSERT INTO body_compositions (
+            body_composition_id, member_id, measured_date,
+            weight, skeletal_muscle, body_fat_percentage
+        ) VALUES (
+            SEQ_BODY_COMPOSITIONS.NEXTVAL, #{memberId}, #{measuredDate,jdbcType=DATE},
+            #{weight,jdbcType=NUMERIC}, #{skeletalMuscle,jdbcType=NUMERIC},
+            #{bodyFatPercentage,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <select id="findByMemberId" resultMap="bodyCompositionResultMap">
+        SELECT body_composition_id, member_id, measured_date,
+               weight, skeletal_muscle, body_fat_percentage, created_at
+        FROM body_compositions
+        WHERE member_id = #{memberId}
+        ORDER BY measured_date DESC, body_composition_id DESC
+    </select>
+
+    <select id="countByMemberIdAndMeasuredDate" resultType="int">
+        SELECT COUNT(*)
+        FROM body_compositions
+        WHERE member_id = #{memberId}
+          AND TRUNC(measured_date) = #{measuredDate,jdbcType=DATE}
+    </select>
+
+    <delete id="deleteByIdAndMemberId">
+        DELETE FROM body_compositions
+        WHERE body_composition_id = #{bodyCompositionId}
+          AND member_id = #{memberId}
+    </delete>
+</mapper>

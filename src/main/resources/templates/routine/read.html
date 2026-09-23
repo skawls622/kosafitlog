@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 루틴 상세</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .exercise-info-action { min-width: 0; }
+        .exercise-info-action .exercise-name { overflow-wrap: anywhere; }
+        .exercise-info-link {
+            display: flex;
+            width: fit-content;
+            min-height: 44px;
+            align-items: center;
+            margin-top: 4px;
+            padding-right: 8px;
+            color: var(--kf-action-primary);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .exercise-info-link:hover { text-decoration: underline; }
+        .exercise-info-link:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
     <div class="app-layout">
@@ -58,11 +79,13 @@
                     <ol class="exercise-list" th:unless="${#lists.isEmpty(routineExercises)}">
                         <li class="list-row" th:each="routineExercise : ${routineExercises}">
                             <span class="list-row-index" aria-hidden="true"></span>
-                            <div>
+                            <div class="exercise-info-action">
                                 <strong class="exercise-name"
                                         th:text="${routineExercise.exerciseName}"></strong>
                                 <span class="badge badge-muted"
                                       th:text="${routineExercise.bodyPart}"></span>
+                                <a class="exercise-info-link"
+                                   th:href="@{/exercise/info(exerciseId=${routineExercise.exerciseId})}">운동 정보 →</a>
                             </div>
                             <span class="exercise-memo" th:if="${routineExercise.memo}"
                                   th:text="${routineExercise.memo}"></span>

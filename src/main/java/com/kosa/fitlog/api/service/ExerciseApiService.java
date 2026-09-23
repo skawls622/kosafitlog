@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.kosa.fitlog.api.dto.ExerciseApiDTO;
@@ -52,30 +53,41 @@ public class ExerciseApiService {
 	
 	public List<ExerciseApiDTO> searchByName(String name) {
 
-	    HttpHeaders headers = new HttpHeaders();
-	    headers.set("X-Api-Key", apiKey);
+	    try {
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("X-Api-Key", apiKey);
 
-	    HttpEntity<String> entity = new HttpEntity<>(headers);
+	        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-	    RestTemplate restTemplate = new RestTemplate();
+	        RestTemplate restTemplate = new RestTemplate();
 
-	    String url = "https://api.api-ninjas.com/v1/exercises?name=" + name;
+	        String url =
+	                "https://api.api-ninjas.com/v1/exercises?name=" + name;
 
-	    ResponseEntity<ExerciseApiDTO[]> response =
-	            restTemplate.exchange(
-	                    url,
-	                    HttpMethod.GET,
-	                    entity,
-	                    ExerciseApiDTO[].class
-	            );
+	        ResponseEntity<ExerciseApiDTO[]> response =
+	                restTemplate.exchange(
+	                        url,
+	                        HttpMethod.GET,
+	                        entity,
+	                        ExerciseApiDTO[].class
+	                );
 
-	    ExerciseApiDTO[] body = response.getBody();
+	        ExerciseApiDTO[] body = response.getBody();
 
-	    if (body == null) {
+	        if (body == null) {
+	            return Collections.emptyList();
+	        }
+
+	        return Arrays.asList(body);
+
+	    } catch (RestClientException e) {
+
+	        System.out.println(
+	                "API Ninjas 호출 실패 : " + e.getMessage()
+	        );
+
 	        return Collections.emptyList();
 	    }
-
-	    return Arrays.asList(body);
 	}
 	
 	

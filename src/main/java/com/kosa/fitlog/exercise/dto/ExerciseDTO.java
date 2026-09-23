@@ -56,7 +56,7 @@ public class ExerciseDTO {
 		return apiKeyword;
 	}
 	
-	public void setApiKeyword() {
+	public void setApiKeyword(String apiKeyword) {
 		this.apiKeyword = apiKeyword;
 	
 	}

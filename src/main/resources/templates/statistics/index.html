@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>운동 통계</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #F5F6F2;
+            color: #1D211F;
+            font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+        }
+        .statistics-page {
+            width: min(100%, 1000px);
+            margin: 0 auto;
+            padding: 32px 16px 64px;
+        }
+        .statistics-controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 240px));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .statistics-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .statistics-field select {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1px solid #DDE1DD;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: inherit;
+            font: inherit;
+        }
+        .chart-panel {
+            position: relative;
+            width: 100%;
+            height: 340px;
+            padding: 16px;
+            border: 1px solid #DDE1DD;
+            border-radius: 12px;
+            background: #FFFFFF;
+        }
+        .body-part-section { margin-top: 36px; }
+        .body-part-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .body-part-header h2 { margin: 0; }
+        .body-part-period { display: inline-flex; align-items: center; gap: 8px; }
+        .body-part-period select {
+            min-width: 140px;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1px solid #DDE1DD;
+            border-radius: 8px;
+            background: #FFFFFF;
+            color: inherit;
+            font: inherit;
+        }
+        .chart-message { margin: 20px 0; color: #6F7772; }
+        .calendar-section { margin: 36px 0; }
+        .calendar-card {
+            max-width: 560px;
+            padding: 20px;
+            border: 1px solid #DDE1DD;
+            border-radius: 12px;
+            background: #FFFFFF;
+        }
+        .calendar-toolbar {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .calendar-toolbar button {
+            min-height: 44px;
+            padding: 8px;
+            border: 0;
+            background: transparent;
+            color: #1D211F;
+            font: inherit;
+            cursor: pointer;
+        }
+        .calendar-toolbar button:first-child { justify-self: start; }
+        .calendar-toolbar button:last-child { justify-self: end; }
+        .calendar-month { white-space: nowrap; }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 4px;
+            text-align: center;
+        }
+        .calendar-weekdays { margin-bottom: 8px; color: #6F7772; }
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            border-radius: 8px;
+        }
+        .calendar-day.workout-day {
+            background: #EAF2E6;
+            color: #4F7945;
+            font-weight: 700;
+        }
+        .calendar-day.today { outline: 1px solid #AAB4AA; outline-offset: -2px; }
+        .calendar-empty { margin-bottom: 0; color: #6F7772; }
+        .table-scroll { max-width: 100%; overflow-x: auto; }
+        table { width: 100%; min-width: 780px; border-collapse: collapse; background: #FFFFFF; }
+        th, td { padding: 9px 12px; text-align: left; }
+        @media (max-width: 600px) {
+            .statistics-controls { grid-template-columns: 1fr; }
+            .chart-panel { height: 280px; }
+            .body-part-period { width: 100%; }
+            .body-part-period select { flex: 1; min-width: 0; }
+            .calendar-card { padding: 14px; }
+            .calendar-day { min-height: 36px; }
+        }
+    </style>
+</head>
+<body>
+<main class="statistics-page">
+    <h1>운동 통계</h1>
+
+    <div class="statistics-controls">
+        <div class="statistics-field">
+            <label for="exerciseSelect">운동 선택</label>
+            <select id="exerciseSelect"></select>
+        </div>
+        <div class="statistics-field">
+            <label for="metricSelect">지표 선택</label>
+            <select id="metricSelect">
+                <option value="totalVolume">총 볼륨</option>
+                <option value="maxWeight">최고 중량</option>
+                <option value="estimated1Rm">예상 1RM</option>
+                <option value="totalReps">총 반복수</option>
+                <option value="totalSets">총 세트수</option>
+            </select>
+        </div>
+    </div>
+
+    <h2 id="chartTitle">운동별 변화</h2>
+    <div id="chartPanel" class="chart-panel">
+        <canvas id="volumeChart"></canvas>
+    </div>
+    <p id="chartMessage" class="chart-message" role="status" hidden></p>
+
+    <section class="body-part-section" aria-labelledby="bodyPartTitle">
+        <div class="body-part-header">
+            <h2 id="bodyPartTitle">부위별 훈련량</h2>
+            <label class="body-part-period" for="bodyPartPeriod">
+                <span>기간</span>
+                <select id="bodyPartPeriod">
+                    <option value="7" selected>최근 7일</option>
+                    <option value="30">최근 30일</option>
+                    <option value="all">전체</option>
+                </select>
+            </label>
+        </div>
+        <div id="bodyPartChartPanel" class="chart-panel">
+            <canvas id="bodyPartChartCanvas"></canvas>
+        </div>
+        <p id="bodyPartChartMessage" class="chart-message" role="status" hidden></p>
+    </section>
+
+    <section class="calendar-section" aria-labelledby="calendarTitle">
+        <h2 id="calendarTitle">운동 캘린더</h2>
+        <div class="calendar-card">
+            <div class="calendar-toolbar">
+                <button id="calendarPrev" type="button" aria-label="이전 달">&lt; 이전</button>
+                <strong id="calendarMonth" class="calendar-month" aria-live="polite"></strong>
+                <button id="calendarNext" type="button" aria-label="다음 달">다음 &gt;</button>
+            </div>
+            <div class="calendar-grid calendar-weekdays" aria-hidden="true">
+                <span>일</span><span>월</span><span>화</span><span>수</span>
+                <span>목</span><span>금</span><span>토</span>
+            </div>
+            <div id="calendarDays" class="calendar-grid" aria-label="완료한 운동 날짜"></div>
+            <p id="calendarEmpty" class="calendar-empty" role="status" hidden>아직 완료한 운동 기록이 없습니다.</p>
+        </div>
+    </section>
+
+    <h2>상세 데이터</h2>
+    <div class="table-scroll">
+        <table border="1">
+            <thead>
+            <tr>
+                <th>운동 날짜</th>
+                <th>운동명</th>
+                <th>부위</th>
+                <th>총 볼륨</th>
+                <th>최고 중량</th>
+                <th>예상 1RM</th>
+                <th>총 반복수</th>
+                <th>총 세트수</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="stat : ${statisticsList}">
+                <td th:text="${stat.workoutDate}"></td>
+                <td th:text="${stat.exerciseName}"></td>
+                <td th:text="${stat.bodyPart}"></td>
+                <td th:text="${stat.totalVolume}"></td>
+                <td th:text="${stat.maxWeight}"></td>
+
+                <td th:text="${stat.estimated1Rm != null ? stat.estimated1Rm : '-'}"></td>
+
+                <td th:text="${stat.totalReps}"></td>
+                <td th:text="${stat.totalSets}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script th:inline="javascript">
+        const statisticsList = /*[[${statisticsList}]]*/ [];
+        const rows = Array.isArray(statisticsList) ? statisticsList : [];
+
+        // select의 value는 StatisticsDTO의 필드명과 같다.
+        const metrics = {
+            totalVolume: { label: '총 볼륨', unit: 'kg' },
+            maxWeight: { label: '최고 중량', unit: 'kg' },
+            estimated1Rm: { label: '예상 1RM', unit: 'kg' },
+            totalReps: { label: '총 반복수', unit: '회' },
+            totalSets: { label: '총 세트수', unit: '세트' }
+        };
+
+        const exerciseSelect = document.getElementById('exerciseSelect');
+        const metricSelect = document.getElementById('metricSelect');
+        const chartTitle = document.getElementById('chartTitle');
+        const chartPanel = document.getElementById('chartPanel');
+        const chartMessage = document.getElementById('chartMessage');
+        const chartCanvas = document.getElementById('volumeChart');
+        const exerciseNames = [...new Set(rows.map(stat => stat.exerciseName).filter(Boolean))];
+
+        exerciseNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            exerciseSelect.appendChild(option);
+        });
+
+        let chart = null;
+
+        function drawChart() {
+            const exerciseName = exerciseSelect.value;
+            const metricName = metricSelect.value;
+            const metric = metrics[metricName];
+            const isCountMetric = metricName === 'totalReps' || metricName === 'totalSets';
+            const exerciseRows = rows
+                .filter(stat => stat.exerciseName === exerciseName)
+                .sort((a, b) => String(a.workoutDate).localeCompare(String(b.workoutDate)));
+            const labels = exerciseRows.map(stat => stat.workoutDate);
+            const values = exerciseRows.map(stat => {
+                const value = stat[metricName];
+                return value == null ? null : Number(value);
+            });
+
+            chartTitle.textContent = exerciseName + ' - ' + metric.label;
+
+            // 같은 canvas에 Chart를 다시 만들기 전에 기존 인스턴스를 정리한다.
+            if (chart != null) {
+                chart.destroy();
+                chart = null;
+            }
+
+            if (values.length === 0 || values.every(value => value === null)) {
+                chartPanel.hidden = true;
+                chartMessage.textContent = metricName === 'estimated1Rm'
+                    ? '표시할 예상 1RM 데이터가 없습니다.'
+                    : '표시할 통계 데이터가 없습니다.';
+                chartMessage.hidden = false;
+                return;
+            }
+
+            if (typeof Chart === 'undefined') {
+                chartPanel.hidden = true;
+                chartMessage.textContent = '차트를 불러오지 못했습니다.';
+                chartMessage.hidden = false;
+                return;
+            }
+
+            chartPanel.hidden = false;
+            chartMessage.hidden = true;
+            const yAxis = { title: { display: true, text: metric.label + ' (' + metric.unit + ')' } };
+            if (isCountMetric) {
+                yAxis.ticks = { precision: 0 };
+            }
+            chart = new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: exerciseName + ' - ' + metric.label,
+                        data: values,
+                        borderColor: '#5F8F52',
+                        backgroundColor: '#5F8F52',
+                        borderWidth: 2,
+                        tension: 0.2,
+                        spanGaps: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: yAxis
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: context => {
+                                    const value = isCountMetric
+                                        ? context.parsed.y.toFixed(0)
+                                        : context.parsed.y;
+                                    return value + ' ' + metric.unit;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        if (exerciseNames.length === 0) {
+            exerciseSelect.disabled = true;
+            metricSelect.disabled = true;
+            chartPanel.hidden = true;
+            chartMessage.textContent = '아직 운동 통계 데이터가 없습니다.';
+            chartMessage.hidden = false;
+        } else {
+            exerciseSelect.value = exerciseNames[0];
+            metricSelect.value = 'totalVolume';
+            drawChart();
+            exerciseSelect.addEventListener('change', drawChart);
+            metricSelect.addEventListener('change', drawChart);
+        }
+
+        const bodyPartPeriod = document.getElementById('bodyPartPeriod');
+        const bodyPartChartPanel = document.getElementById('bodyPartChartPanel');
+        const bodyPartChartMessage = document.getElementById('bodyPartChartMessage');
+        const latestWorkoutDate = rows.map(stat => stat.workoutDate).filter(Boolean).sort().pop();
+        let bodyPartChart = null;
+
+        function drawBodyPartChart() {
+            let filteredRows = rows;
+            if (bodyPartPeriod.value !== 'all') {
+                if (!latestWorkoutDate) {
+                    filteredRows = [];
+                } else {
+                    const startDate = new Date(latestWorkoutDate + 'T00:00:00Z');
+                    startDate.setUTCDate(startDate.getUTCDate() - (Number(bodyPartPeriod.value) - 1));
+                    const startDateText = startDate.toISOString().slice(0, 10);
+                    filteredRows = rows.filter(stat =>
+                        stat.workoutDate >= startDateText && stat.workoutDate <= latestWorkoutDate);
+                }
+            }
+
+            const bodyPartStats = Object.create(null);
+            filteredRows.forEach(stat => {
+                const bodyPart = stat.bodyPart;
+                if (!bodyPart) return;
+
+                const sets = Number(stat.totalSets);
+                const volume = Number(stat.totalVolume);
+                if (bodyPartStats[bodyPart] == null) {
+                    bodyPartStats[bodyPart] = { totalSets: 0, totalVolume: 0 };
+                }
+                if (Number.isFinite(sets)) bodyPartStats[bodyPart].totalSets += sets;
+                if (Number.isFinite(volume)) bodyPartStats[bodyPart].totalVolume += volume;
+            });
+
+            const bodyPartLabels = Object.keys(bodyPartStats)
+                .sort((a, b) => bodyPartStats[b].totalSets - bodyPartStats[a].totalSets);
+            const bodyPartSets = bodyPartLabels.map(bodyPart => bodyPartStats[bodyPart].totalSets);
+            const bodyPartVolumes = bodyPartLabels.map(bodyPart => bodyPartStats[bodyPart].totalVolume);
+
+            if (bodyPartChart != null) {
+                bodyPartChart.destroy();
+                bodyPartChart = null;
+            }
+
+            if (bodyPartLabels.length === 0) {
+                bodyPartChartPanel.hidden = true;
+                bodyPartChartMessage.textContent = '선택한 기간의 부위별 훈련량 데이터가 없습니다.';
+                bodyPartChartMessage.hidden = false;
+                return;
+            }
+            if (typeof Chart === 'undefined') {
+                bodyPartChartPanel.hidden = true;
+                bodyPartChartMessage.textContent = '차트를 불러오지 못했습니다.';
+                bodyPartChartMessage.hidden = false;
+                return;
+            }
+
+            bodyPartChartPanel.hidden = false;
+            bodyPartChartMessage.hidden = true;
+            bodyPartChartPanel.style.height = Math.max(340, bodyPartLabels.length * 48 + 100) + 'px';
+            bodyPartChart = new Chart(document.getElementById('bodyPartChartCanvas'), {
+                type: 'bar',
+                data: {
+                    labels: bodyPartLabels,
+                    datasets: [{
+                        label: '총 세트수',
+                        data: bodyPartSets,
+                        backgroundColor: '#5F8F52'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            suggestedMax: 30,
+                            ticks: { stepSize: 5, precision: 0 },
+                            title: { display: true, text: '총 세트수(세트)' }
+                        },
+                        y: { ticks: { autoSkip: false } }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: context => [
+                                    '총 세트수: ' + context.parsed.x.toFixed(0) + ' 세트',
+                                    '총 볼륨: ' + bodyPartVolumes[context.dataIndex].toLocaleString('ko-KR') + ' kg'
+                                ]
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        drawBodyPartChart();
+        bodyPartPeriod.addEventListener('change', drawBodyPartChart);
+
+        const workoutDates = /*[[${workoutDates}]]*/ [];
+        const completedDates = new Set(Array.isArray(workoutDates) ? workoutDates : []);
+        const latestCalendarDate = [...completedDates].sort().pop();
+        const today = new Date();
+        let calendarYear = latestCalendarDate
+            ? Number(latestCalendarDate.slice(0, 4)) : today.getFullYear();
+        let calendarMonth = latestCalendarDate
+            ? Number(latestCalendarDate.slice(5, 7)) - 1 : today.getMonth();
+        const calendarMonthLabel = document.getElementById('calendarMonth');
+        const calendarDays = document.getElementById('calendarDays');
+        document.getElementById('calendarEmpty').hidden = completedDates.size > 0;
+
+        function renderCalendar() {
+            calendarMonthLabel.textContent = calendarYear + '년 ' + (calendarMonth + 1) + '월';
+            calendarDays.replaceChildren();
+
+            const firstWeekday = new Date(calendarYear, calendarMonth, 1).getDay();
+            const dayCount = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstWeekday; i++) {
+                const blank = document.createElement('span');
+                blank.className = 'calendar-day';
+                blank.setAttribute('aria-hidden', 'true');
+                calendarDays.appendChild(blank);
+            }
+
+            for (let day = 1; day <= dayCount; day++) {
+                const date = calendarYear + '-' + String(calendarMonth + 1).padStart(2, '0')
+                    + '-' + String(day).padStart(2, '0');
+                const cell = document.createElement('span');
+                cell.className = 'calendar-day';
+                cell.textContent = day;
+                if (completedDates.has(date)) {
+                    cell.classList.add('workout-day');
+                    cell.setAttribute('aria-label', date + ' 운동 완료');
+                }
+                if (calendarYear === today.getFullYear()
+                        && calendarMonth === today.getMonth() && day === today.getDate()) {
+                    cell.classList.add('today');
+                }
+                calendarDays.appendChild(cell);
+            }
+        }
+
+        document.getElementById('calendarPrev').addEventListener('click', () => {
+            const previousMonth = new Date(calendarYear, calendarMonth - 1, 1);
+            calendarYear = previousMonth.getFullYear();
+            calendarMonth = previousMonth.getMonth();
+            renderCalendar();
+        });
+        document.getElementById('calendarNext').addEventListener('click', () => {
+            const nextMonth = new Date(calendarYear, calendarMonth + 1, 1);
+            calendarYear = nextMonth.getFullYear();
+            calendarMonth = nextMonth.getMonth();
+            renderCalendar();
+        });
+        renderCalendar();
+    </script>
+</main>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>운동 정보</title>
+    <style>
+        :root {
+            --info-text: #1D211F;
+            --info-muted: #6F7772;
+            --info-line: #DDE1DD;
+            --info-accent: #5F8F52;
+            --info-accent-soft: #EAF2E6;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #FFFFFF;
+            color: var(--info-text);
+            font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .exercise-info {
+            width: min(100%, 720px);
+            margin: 0 auto;
+            padding: 36px 22px 72px;
+        }
+
+        .exercise-info__back {
+            display: inline-flex;
+            min-height: 44px;
+            align-items: center;
+            margin: 0 0 18px -8px;
+            padding: 0 8px;
+            border: 0;
+            background: transparent;
+            color: var(--info-muted);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .exercise-info__back:hover { color: var(--info-accent); }
+        .exercise-info__back:focus-visible {
+            outline: 2px solid var(--info-accent);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .exercise-info__eyebrow {
+            margin: 0 0 18px;
+            color: var(--info-accent);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .exercise-info__header {
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--info-line);
+        }
+
+        .exercise-info__title {
+            margin: 0 0 18px;
+            font-size: clamp(32px, 8vw, 46px);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.045em;
+            overflow-wrap: anywhere;
+        }
+
+        .exercise-info__body-part {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            margin: 0;
+            padding: 5px 13px;
+            border-radius: 999px;
+            background: var(--info-accent-soft);
+            color: var(--info-accent);
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .exercise-info__facts {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px 20px;
+            margin: 0;
+            padding: 30px 0;
+            border-bottom: 1px solid var(--info-line);
+        }
+
+        .exercise-info__fact-label {
+            margin: 0 0 6px;
+            color: var(--info-muted);
+            font-size: 13px;
+        }
+
+        .exercise-info__fact-value {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .exercise-info__section {
+            padding: 28px 0;
+            border-bottom: 1px solid var(--info-line);
+        }
+
+        .exercise-info__section-title {
+            margin: 0 0 12px;
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .exercise-info__section-text {
+            margin: 0;
+            color: var(--info-text);
+            font-size: 15px;
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+        }
+
+        .exercise-info__source {
+            margin: 24px 0 0;
+            color: var(--info-muted);
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .exercise-info__empty {
+            margin-top: 30px;
+            padding: 24px;
+            border: 1px solid var(--info-line);
+            border-radius: 12px;
+            background: #F5F6F2;
+        }
+
+        .exercise-info__empty p {
+            margin: 0;
+            color: var(--info-muted);
+        }
+
+        @media (min-width: 640px) {
+            .exercise-info { padding: 60px 36px 96px; }
+            .exercise-info__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <main class="exercise-info">
+        <header class="exercise-info__header">
+            <button class="exercise-info__back" type="button" onclick="window.history.back()">← 뒤로</button>
+            <p class="exercise-info__eyebrow">운동 정보</p>
+            <h1 class="exercise-info__title" th:text="${exercise.exerciseName}">운동명</h1>
+            <p class="exercise-info__body-part" th:text="${exercise.bodyPart}">운동 부위</p>
+        </header>
+
+        <div th:if="${apiExercise != null}">
+            <dl class="exercise-info__facts">
+                <div>
+                    <dt class="exercise-info__fact-label">난이도</dt>
+                    <dd class="exercise-info__fact-value" th:text="${apiExercise.difficulty}"></dd>
+                </div>
+                <div>
+                    <dt class="exercise-info__fact-label">운동 유형</dt>
+                    <dd class="exercise-info__fact-value" th:text="${apiExercise.type}"></dd>
+                </div>
+                <div>
+                    <dt class="exercise-info__fact-label">자극 부위</dt>
+                    <dd class="exercise-info__fact-value" th:text="${apiExercise.muscle}"></dd>
+                </div>
+            </dl>
+
+            <section class="exercise-info__section">
+                <h2 class="exercise-info__section-title">필요 장비</h2>
+                <p class="exercise-info__section-text" th:text="${apiExercise.equipments}"></p>
+            </section>
+
+            <section class="exercise-info__section">
+                <h2 class="exercise-info__section-title">운동 방법</h2>
+                <p class="exercise-info__section-text" th:text="${apiExercise.instructions}"></p>
+            </section>
+
+            <section class="exercise-info__section"
+                     th:if="${apiExercise.safetyInfo != null and !#strings.isEmpty(apiExercise.safetyInfo)}">
+                <h2 class="exercise-info__section-title">안전 가이드</h2>
+                <p class="exercise-info__section-text" th:text="${apiExercise.safetyInfo}"></p>
+            </section>
+
+            <p class="exercise-info__source">
+                참고 운동명: <span th:text="${apiExercise.name}">API 운동명</span>
+            </p>
+        </div>
+
+        <div class="exercise-info__empty" th:if="${apiExercise == null}">
+            <p>운동 상세 정보를 불러오지 못했습니다.</p>
+        </div>
+    </main>
+</body>
+</html>

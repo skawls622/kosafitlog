@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kosa.fitlog.statistics.mapper.StatisticsMapper">
+
+	<resultMap id="statisticsResultMap"
+		type="com.kosa.fitlog.statistics.dto.StatisticsDTO">
+
+		<result property="workoutDate" column="workout_date" />
+		<result property="exerciseId" column="exercise_id" />
+		<result property="exerciseName" column="exercise_name" />
+		<result property="bodyPart" column="body_part" />
+
+		<result property="totalVolume" column="total_volume" />
+		<result property="maxWeight" column="max_weight" />
+		<result property="estimated1Rm" column="estimated_1rm" />
+
+		<result property="totalReps" column="total_reps" />
+		<result property="totalSets" column="total_sets" />
+
+	</resultMap>
+
+	<select id="findExerciseStatistics"
+		resultMap="statisticsResultMap">
+
+		SELECT
+		TRUNC(wl.workout_date) AS workout_date,
+			e.exercise_id,
+			e.exercise_name,
+			e.body_part,
+
+		-- 그날 총 볼륨
+			SUM(NVL(ws.weight, 0) * ws.reps) AS total_volume,
+
+		-- 실제로 사용한 최고 중량
+			MAX(ws.weight) AS max_weight,
+
+		-- 예상 1RM (Epley 공식)
+		ROUND(
+			MAX(
+				CASE
+					WHEN ws.weight IS NOT NULL
+						AND ws.weight > 0
+						AND ws.reps BETWEEN 1 AND 12
+					THEN ws.weight * (1 + ws.reps / 30)
+					ELSE NULL
+				END
+		),
+		1
+		) AS estimated_1rm,
+
+		-- 총 반복수
+		SUM(ws.reps) AS total_reps,
+
+		-- 총 세트수
+		COUNT(ws.workout_set_id) AS total_sets
+
+		FROM workout_logs wl
+
+		JOIN workout_exercises we
+			ON we.workout_log_id = wl.workout_log_id
+
+		JOIN exercises e
+			ON e.exercise_id = we.exercise_id
+
+		JOIN workout_sets ws
+			ON ws.workout_exercise_id = we.workout_exercise_id
+
+		WHERE wl.member_id = #{memberId}
+			AND wl.updated_at IS NOT NULL
+
+		GROUP BY
+			TRUNC(wl.workout_date),
+			e.exercise_id,
+			e.exercise_name,
+			e.body_part
+
+		ORDER BY
+			workout_date,
+			e.exercise_id
+
+	</select>
+
+	<select id="findCompletedWorkoutDates" resultType="java.time.LocalDate">
+		SELECT DISTINCT TRUNC(workout_date) AS workout_date
+		FROM workout_logs
+		WHERE member_id = #{memberId}
+			AND updated_at IS NOT NULL
+		ORDER BY workout_date
+	</select>
+
+</mapper>

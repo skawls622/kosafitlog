@@ -8,7 +8,7 @@
 		<result property="exerciseName" column="exercise_name" />
 		<result property="bodyPart" column="body_part" />
 		<result property="description" column="description" />
-		<result property="apikeyword" column="api_keyword" />
+		<result property="apiKeyword" column="api_keyword" />
 		<result property="createdAt" column="created_at" />
 	</resultMap>
 
