@@ -1,213 +1,344 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>체성분 기록 - kosaFitLog!</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .body-composition-page { width: min(100%, 1000px); margin: 0 auto; padding: 32px 16px 64px; }
-        .body-composition-section { margin-top: 32px; }
-        .measurement-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-        .measurement-form .button-row { grid-column: 1 / -1; justify-content: flex-end; }
-        .section-heading { margin: 0 0 16px; font-size: 23px; }
-        .chart-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-        .chart-header .section-heading { margin: 0; }
-        .chart-select { min-width: 150px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--kf-border-default); border-radius: 8px; background: #FFFFFF; color: inherit; font: inherit; }
-        .chart-panel { position: relative; width: 100%; height: 340px; }
-        .chart-message { margin: 0; padding: 24px; color: var(--kf-text-secondary); }
-        .feedback { margin: 16px 0; padding: 12px 16px; border-radius: 8px; }
-        .feedback-error { color: #9B3535; background: #FCF1F1; }
-        .feedback-success { color: #376C43; background: var(--kf-success-soft); }
-        .record-scroll { max-width: 100%; overflow-x: auto; }
-        .record-table { width: 100%; min-width: 620px; border-collapse: collapse; }
-        .record-table th, .record-table td { padding: 13px 14px; border-bottom: 1px solid var(--kf-border-default); text-align: left; }
-        .record-table th { color: var(--kf-text-secondary); font-size: 13px; }
-        .record-table tbody tr:last-child td { border-bottom: 0; }
-        .record-table form { margin: 0; }
-        @media (max-width: 720px) {
-            .measurement-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .chart-panel { height: 280px; }
-        }
-        @media (max-width: 480px) {
-            .measurement-form { grid-template-columns: 1fr; }
-            .measurement-form .button-row, .measurement-form .btn { width: 100%; }
-            .chart-select { width: 100%; }
-            .card-body { padding: 20px; }
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>체성분 기록 - kosaFitLog!</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<style>
+		.body-composition-page {
+			width: min(100%, 1160px);
+			margin: 0 auto;
+			padding: 40px 24px 76px;
+		}
+
+		.body-composition-section {
+			margin-top: 32px;
+		}
+
+		.body-composition-back {
+			display: inline-flex;
+			min-height: 44px;
+			align-items: center;
+			margin-bottom: 12px;
+		}
+
+		.measurement-form {
+			display: grid;
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 16px;
+		}
+
+		.measurement-form .button-row {
+			grid-column: 1 / -1;
+			justify-content: flex-end;
+		}
+
+		.section-heading {
+			margin: 0 0 16px;
+			font-size: 25px;
+			letter-spacing: -0.04em;
+		}
+
+		.chart-header {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			margin-bottom: 16px;
+		}
+
+		.chart-header .section-heading {
+			margin: 0;
+		}
+
+		.chart-select {
+			min-width: 150px;
+			min-height: 44px;
+			padding: 8px 12px;
+			border: 1px solid var(--kf-border-default);
+			border-radius: 8px;
+			background: #FFFFFF;
+			color: inherit;
+			font: inherit;
+		}
+
+		.chart-panel {
+			position: relative;
+			width: 100%;
+			height: 380px;
+		}
+
+		.chart-message {
+			margin: 0;
+			padding: 24px;
+			color: var(--kf-text-secondary);
+		}
+
+		.feedback {
+			margin: 16px 0;
+			padding: 12px 16px;
+			border-radius: 8px;
+		}
+
+		.feedback-error {
+			color: #9B3535;
+			background: #FCF1F1;
+		}
+
+		.feedback-success {
+			color: #376C43;
+			background: var(--kf-success-soft);
+		}
+
+		.record-scroll {
+			max-width: 100%;
+			overflow-x: auto;
+		}
+
+		.record-table {
+			width: 100%;
+			min-width: 620px;
+			border-collapse: collapse;
+		}
+
+		.record-table th,
+		.record-table td {
+			padding: 13px 14px;
+			border-bottom: 1px solid var(--kf-border-default);
+			text-align: left;
+		}
+
+		.record-table th {
+			color: var(--kf-text-secondary);
+			font-size: 13px;
+		}
+
+		.record-table tbody tr:last-child td {
+			border-bottom: 0;
+		}
+
+		.record-table form {
+			margin: 0;
+		}
+
+		@media (max-width: 720px) {
+			.measurement-form {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+
+			.chart-panel {
+				height: 280px;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.body-composition-page { padding: 22px 16px 56px; }
+			.measurement-form {
+				grid-template-columns: 1fr;
+			}
+
+			.measurement-form .button-row,
+			.measurement-form .btn {
+				width: 100%;
+			}
+
+			.chart-select {
+				width: 100%;
+			}
+
+			.card-body {
+				padding: 20px;
+			}
+		}
+	</style>
 </head>
+
 <body>
-<main class="body-composition-page">
-    <header class="page-header">
-        <div>
-            <h1 class="page-title">체성분 기록</h1>
-            <p class="page-description">측정한 값을 날짜별로 기록하고 변화를 확인하세요.</p>
-        </div>
-        <a class="btn btn-secondary" th:href="@{/statistics}">운동 통계로</a>
-    </header>
+	<header th:replace="fragments/dashboard-header :: header('bodyComposition')"></header>
+	<main class="body-composition-page">
+		<a class="text-link body-composition-back" th:href="@{/main}">← 메인으로</a>
+		<header class="page-header">
+			<div>
+				<h1 class="page-title">체성분 기록</h1>
+				<p class="page-description">측정한 값을 날짜별로 기록하고 변화를 확인하세요.</p>
+			</div>
+			<a class="btn btn-secondary" th:href="@{/statistics}">운동 통계로</a>
+		</header>
 
-    <p class="feedback feedback-error" role="alert" th:if="${recordError}" th:text="${recordError}"></p>
-    <p class="feedback feedback-error" role="alert" th:if="${deleteError}" th:text="${deleteError}"></p>
-    <p class="feedback feedback-success" role="status" th:if="${recordSuccess}" th:text="${recordSuccess}"></p>
+		<p class="feedback feedback-error" role="alert" th:if="${recordError}" th:text="${recordError}"></p>
+		<p class="feedback feedback-error" role="alert" th:if="${deleteError}" th:text="${deleteError}"></p>
+		<p class="feedback feedback-success" role="status" th:if="${recordSuccess}" th:text="${recordSuccess}"></p>
 
-    <section class="body-composition-section" aria-labelledby="registerTitle">
-        <h2 id="registerTitle" class="section-heading">새 기록</h2>
-        <div class="card card-body">
-            <form class="measurement-form" th:action="@{/body-composition/register}" method="post">
-                <div class="form-group">
-                    <label class="form-label" for="measuredDate">측정일</label>
-                    <input class="form-control" id="measuredDate" name="measuredDate" type="date"
-                           th:attr="max=${today}" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="weight">체중 (kg)</label>
-                    <input class="form-control" id="weight" name="weight" type="number"
-                           inputmode="decimal" min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="skeletalMuscle">골격근량 (kg)</label>
-                    <input class="form-control" id="skeletalMuscle" name="skeletalMuscle" type="number"
-                           inputmode="decimal" min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="bodyFatPercentage">체지방률 (%)</label>
-                    <input class="form-control" id="bodyFatPercentage" name="bodyFatPercentage" type="number"
-                           inputmode="decimal" min="0" max="100" step="0.01" placeholder="선택 입력">
-                </div>
-                <div class="button-row">
-                    <button class="btn btn-primary" type="submit">기록하기</button>
-                </div>
-            </form>
-            <p class="form-help">체중, 골격근량, 체지방률 중 하나 이상 입력해 주세요. 같은 날짜의 기록은 하나만 저장할 수 있습니다.</p>
-        </div>
-    </section>
+		<section class="body-composition-section" aria-labelledby="registerTitle">
+			<h2 id="registerTitle" class="section-heading">새 기록</h2>
+			<div class="card card-body">
+				<form class="measurement-form" th:action="@{/body-composition/register}" method="post">
+					<div class="form-group">
+						<label class="form-label" for="measuredDate">측정일</label>
+						<input class="form-control" id="measuredDate" name="measuredDate" type="date"
+							th:attr="max=${today}" required>
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="weight">체중 (kg)</label>
+						<input class="form-control" id="weight" name="weight" type="number" inputmode="decimal"
+							min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="skeletalMuscle">골격근량 (kg)</label>
+						<input class="form-control" id="skeletalMuscle" name="skeletalMuscle" type="number"
+							inputmode="decimal" min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="bodyFatPercentage">체지방률 (%)</label>
+						<input class="form-control" id="bodyFatPercentage" name="bodyFatPercentage" type="number"
+							inputmode="decimal" min="0" max="100" step="0.01" placeholder="선택 입력">
+					</div>
+					<div class="button-row">
+						<button class="btn btn-primary" type="submit">기록하기</button>
+					</div>
+				</form>
+				<p class="form-help">체중, 골격근량, 체지방률 중 하나 이상 입력해 주세요. 같은 날짜의 기록은 하나만 저장할 수 있습니다.</p>
+			</div>
+		</section>
 
-    <section class="body-composition-section" aria-labelledby="chartTitle">
-        <div class="chart-header">
-            <h2 id="chartTitle" class="section-heading">체성분 변화</h2>
-            <select id="metricSelect" class="chart-select" aria-label="차트 지표 선택">
-                <option value="weight" selected>체중</option>
-                <option value="skeletalMuscle">골격근량</option>
-                <option value="bodyFatPercentage">체지방률</option>
-            </select>
-        </div>
-        <div class="card card-body">
-            <div id="chartPanel" class="chart-panel"><canvas id="bodyCompositionChart"></canvas></div>
-            <p id="chartMessage" class="chart-message" role="status" hidden></p>
-        </div>
-    </section>
+		<section class="body-composition-section" aria-labelledby="chartTitle">
+			<div class="chart-header">
+				<h2 id="chartTitle" class="section-heading">체성분 변화</h2>
+				<select id="metricSelect" class="chart-select" aria-label="차트 지표 선택">
+					<option value="weight" selected>체중</option>
+					<option value="skeletalMuscle">골격근량</option>
+					<option value="bodyFatPercentage">체지방률</option>
+				</select>
+			</div>
+			<div class="card card-body">
+				<div id="chartPanel" class="chart-panel"><canvas id="bodyCompositionChart" role="img" aria-label="선택한 체성분 지표의 변화"></canvas></div>
+				<p id="chartMessage" class="chart-message" role="status" hidden></p>
+			</div>
+		</section>
 
-    <section class="body-composition-section" aria-labelledby="historyTitle">
-        <h2 id="historyTitle" class="section-heading">기록 내역</h2>
-        <div class="card">
-            <p class="empty-state" th:if="${#lists.isEmpty(bodyCompositionList)}">아직 체성분 기록이 없습니다.</p>
-            <div class="record-scroll" th:unless="${#lists.isEmpty(bodyCompositionList)}">
-                <table class="record-table">
-                    <thead>
-                    <tr><th>측정일</th><th>체중 (kg)</th><th>골격근량 (kg)</th><th>체지방률 (%)</th><th>삭제</th></tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="record : ${bodyCompositionList}">
-                        <td th:text="${record.measuredDate}"></td>
-                        <td th:text="${record.weight != null ? record.weight : '-'}"></td>
-                        <td th:text="${record.skeletalMuscle != null ? record.skeletalMuscle : '-'}"></td>
-                        <td th:text="${record.bodyFatPercentage != null ? record.bodyFatPercentage : '-'}"></td>
-                        <td>
-                            <form th:action="@{/body-composition/delete}" method="post"
-                                  onsubmit="return confirm('이 기록을 삭제하시겠습니까?');">
-                                <input type="hidden" name="bodyCompositionId" th:value="${record.bodyCompositionId}">
-                                <button class="btn btn-danger-soft btn-sm" type="submit">삭제</button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+		<section class="body-composition-section" aria-labelledby="historyTitle">
+			<h2 id="historyTitle" class="section-heading">기록 내역</h2>
+			<div class="card">
+				<p class="empty-state" th:if="${#lists.isEmpty(bodyCompositionList)}">아직 체성분 기록이 없습니다.</p>
+				<div class="record-scroll" th:unless="${#lists.isEmpty(bodyCompositionList)}">
+					<table class="record-table">
+						<thead>
+							<tr>
+								<th>측정일</th>
+								<th>체중 (kg)</th>
+								<th>골격근량 (kg)</th>
+								<th>체지방률 (%)</th>
+								<th>삭제</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="record : ${bodyCompositionList}">
+								<td th:text="${record.measuredDate}"></td>
+								<td th:text="${record.weight != null ? record.weight : '-'}"></td>
+								<td th:text="${record.skeletalMuscle != null ? record.skeletalMuscle : '-'}"></td>
+								<td th:text="${record.bodyFatPercentage != null ? record.bodyFatPercentage : '-'}"></td>
+								<td>
+									<form th:action="@{/body-composition/delete}" method="post"
+										onsubmit="return confirm('이 기록을 삭제하시겠습니까?');">
+										<input type="hidden" name="bodyCompositionId"
+											th:value="${record.bodyCompositionId}">
+										<button class="btn btn-danger-soft btn-sm" type="submit">삭제</button>
+									</form>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</section>
 
-    <script th:inline="javascript">
-        const bodyCompositionList = /*[[${bodyCompositionList}]]*/ [];
-        const chartRows = Array.isArray(bodyCompositionList)
-            ? [...bodyCompositionList].sort((a, b) =>
-                String(a.measuredDate).localeCompare(String(b.measuredDate)))
-            : [];
-        const metrics = {
-            weight: { label: '체중', unit: 'kg' },
-            skeletalMuscle: { label: '골격근량', unit: 'kg' },
-            bodyFatPercentage: { label: '체지방률', unit: '%' }
-        };
-        const metricSelect = document.getElementById('metricSelect');
-        const chartPanel = document.getElementById('chartPanel');
-        const chartMessage = document.getElementById('chartMessage');
-        let bodyCompositionChart = null;
+		<script th:inline="javascript">
+			const bodyCompositionList = /*[[${bodyCompositionList}]]*/[];
+			const chartColor = getComputedStyle(document.documentElement)
+				.getPropertyValue('--kf-action-primary').trim() || '#C84B30';
+			const chartRows = Array.isArray(bodyCompositionList)
+				? [...bodyCompositionList].sort((a, b) =>
+					String(a.measuredDate).localeCompare(String(b.measuredDate)))
+				: [];
+			const metrics = {
+				weight: {label: '체중', unit: 'kg'},
+				skeletalMuscle: {label: '골격근량', unit: 'kg'},
+				bodyFatPercentage: {label: '체지방률', unit: '%'}
+			};
+			const metricSelect = document.getElementById('metricSelect');
+			const chartPanel = document.getElementById('chartPanel');
+			const chartMessage = document.getElementById('chartMessage');
+			let bodyCompositionChart = null;
 
-        function drawBodyCompositionChart() {
-            const metricName = metricSelect.value;
-            const metric = metrics[metricName];
-            const labels = chartRows.map(record => record.measuredDate);
-            const values = chartRows.map(record => {
-                const rawValue = record[metricName];
-                if (rawValue == null) return null;
-                const value = Number(rawValue);
-                return Number.isFinite(value) ? value : null;
-            });
+			function drawBodyCompositionChart() {
+				const metricName = metricSelect.value;
+				const metric = metrics[metricName];
+				const labels = chartRows.map(record => record.measuredDate);
+				const values = chartRows.map(record => {
+					const rawValue = record[metricName];
+					if (rawValue == null) return null;
+					const value = Number(rawValue);
+					return Number.isFinite(value) ? value : null;
+				});
 
-            if (bodyCompositionChart != null) {
-                bodyCompositionChart.destroy();
-                bodyCompositionChart = null;
-            }
-            if (values.length === 0 || values.every(value => value === null)) {
-                chartPanel.hidden = true;
-                chartMessage.textContent = '표시할 ' + metric.label + ' 데이터가 없습니다.';
-                chartMessage.hidden = false;
-                return;
-            }
-            if (typeof Chart === 'undefined') {
-                chartPanel.hidden = true;
-                chartMessage.textContent = '차트를 불러오지 못했습니다.';
-                chartMessage.hidden = false;
-                return;
-            }
+				if (bodyCompositionChart != null) {
+					bodyCompositionChart.destroy();
+					bodyCompositionChart = null;
+				}
+				if (values.length === 0 || values.every(value => value === null)) {
+					chartPanel.hidden = true;
+					chartMessage.textContent = '표시할 ' + metric.label + ' 데이터가 없습니다.';
+					chartMessage.hidden = false;
+					return;
+				}
+				if (typeof Chart === 'undefined') {
+					chartPanel.hidden = true;
+					chartMessage.textContent = '차트를 불러오지 못했습니다.';
+					chartMessage.hidden = false;
+					return;
+				}
 
-            chartPanel.hidden = false;
-            chartMessage.hidden = true;
-            bodyCompositionChart = new Chart(document.getElementById('bodyCompositionChart'), {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: metric.label,
-                        data: values,
-                        borderColor: '#5F8F52',
-                        backgroundColor: '#5F8F52',
-                        borderWidth: 2,
-                        tension: 0.2,
-                        spanGaps: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { title: { display: true, text: metric.label + ' (' + metric.unit + ')' } }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: context => context.parsed.y + ' ' + metric.unit
-                            }
-                        }
-                    }
-                }
-            });
-        }
+				chartPanel.hidden = false;
+				chartMessage.hidden = true;
+				bodyCompositionChart = new Chart(document.getElementById('bodyCompositionChart'), {
+					type: 'line',
+					data: {
+						labels: labels,
+						datasets: [{
+							label: metric.label,
+							data: values,
+							borderColor: chartColor,
+							backgroundColor: chartColor,
+							borderWidth: 2,
+							tension: 0.2,
+							spanGaps: true
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						scales: {
+							y: {title: {display: true, text: metric.label + ' (' + metric.unit + ')'}}
+						},
+						plugins: {
+							tooltip: {
+								callbacks: {
+									label: context => context.parsed.y + ' ' + metric.unit
+								}
+							}
+						}
+					}
+				});
+			}
 
-        drawBodyCompositionChart();
-        metricSelect.addEventListener('change', drawBodyCompositionChart);
-    </script>
-</main>
+			drawBodyCompositionChart();
+			metricSelect.addEventListener('change', drawBodyCompositionChart);
+		</script>
+	</main>
 </body>
+
 </html>

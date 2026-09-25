@@ -15,7 +15,8 @@
                 <header class="page-header">
                     <div>
                         <h1 class="page-title">운동 기록</h1>
-                        <p class="page-description">오늘의 세트를 기록하고 운동을 완료하세요.</p>
+                        <p class="page-description"
+                           th:text="${workoutLog.updatedAt == null ? '오늘의 세트를 기록하고 운동을 완료하세요.' : '완료한 세트 기록을 확인하세요.'}">오늘의 세트를 기록하고 운동을 완료하세요.</p>
                         <div class="summary-meta">
                             <span class="badge"
                                   th:classappend="${workoutLog.updatedAt == null} ? ' badge-primary' : ' badge-success'"
@@ -50,6 +51,7 @@
                                : '등록된 세트 기록이 없습니다.'}">
                         </p>
 
+                        <div class="set-table-scroll">
                         <table class="set-table" th:unless="${#lists.isEmpty(sets)}">
                             <thead>
                                 <tr>
@@ -82,6 +84,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
 
                         <form class="set-form" th:action="@{/workout/set/add}" method="post"
                               th:if="${workoutLog.updatedAt == null}">
@@ -89,19 +92,22 @@
                                    th:value="${workoutLog.workoutLogId}">
                             <input type="hidden" name="workoutExerciseId"
                                    th:value="${workoutExercise.workoutExerciseId}">
-                            <div class="form-group">
-                                <label class="form-label">KG</label>
+                            <div class="form-group set-form-weight">
+                                <label class="form-label" th:for="${'weight-' + workoutExercise.workoutExerciseId}">KG</label>
                                 <input class="form-control" type="number" name="weight"
+                                       th:id="${'weight-' + workoutExercise.workoutExerciseId}" inputmode="decimal"
                                        min="0" max="9999.99" step="0.01" placeholder="0">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">REPS</label>
+                            <div class="form-group set-form-reps">
+                                <label class="form-label" th:for="${'reps-' + workoutExercise.workoutExerciseId}">REPS</label>
                                 <input class="form-control" type="number" name="reps"
+                                       th:id="${'reps-' + workoutExercise.workoutExerciseId}" inputmode="numeric"
                                        min="1" max="999" required placeholder="0">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">메모</label>
+                            <div class="form-group set-form-memo">
+                                <label class="form-label" th:for="${'memo-' + workoutExercise.workoutExerciseId}">메모</label>
                                 <input class="form-control" type="text" name="memo"
+                                       th:id="${'memo-' + workoutExercise.workoutExerciseId}"
                                        maxlength="500" placeholder="선택">
                             </div>
                             <button class="btn btn-primary" type="submit">+ 세트 추가</button>

@@ -28,6 +28,8 @@
 
                 <p class="alert" th:if="${exerciseError}" th:text="${exerciseError}"></p>
 
+                <p class="empty-state" th:if="${#lists.isEmpty(exercises)}">추가할 운동이 없습니다.</p>
+
                 <section class="exercise-catalog">
                     <article class="exercise-catalog-row" th:each="exercise : ${exercises}">
                         <div>
@@ -42,7 +44,9 @@
                                    th:value="${routine.routineId}">
                             <input type="hidden" name="exerciseId"
                                    th:value="${exercise.exerciseId}">
+                            <label class="sr-only" th:for="${'exercise-memo-' + exercise.exerciseId}">운동 메모</label>
                             <input class="form-control" type="text" name="memo"
+                                   th:id="${'exercise-memo-' + exercise.exerciseId}"
                                    maxlength="500" placeholder="메모 (선택)">
                             <button class="btn btn-primary" type="submit">추가</button>
                         </form>

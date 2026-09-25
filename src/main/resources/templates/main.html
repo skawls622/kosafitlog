@@ -8,66 +8,329 @@
 </head>
 <body>
     <div class="landing-page">
-        <header class="landing-header">
+        <header class="landing-header" th:if="${session.loginMember == null}">
             <div class="landing-shell landing-header-inner">
                 <a class="landing-logo" th:href="@{/main}">kosaFitLog!</a>
-                <nav class="landing-nav" aria-label="회원 메뉴"
-                     th:if="${session.loginMember == null}">
+                <nav class="landing-nav" aria-label="회원 메뉴">
                     <a class="btn btn-secondary" th:href="@{/member/login}">로그인</a>
                     <a class="btn btn-primary" th:href="@{/member/signup}">회원가입</a>
                 </nav>
-                <div class="landing-member-menu" th:if="${session.loginMember != null}">
-                    <span class="landing-welcome">
-                        안녕하세요, <strong th:text="${session.loginMember.nickname}">회원</strong>님
-                    </span>
-                    <form th:action="@{/member/logout}" method="post">
-                        <button class="btn btn-secondary" type="submit">로그아웃</button>
-                    </form>
-                </div>
             </div>
         </header>
 
-        <main>
+        <th:block th:if="${session.loginMember != null}">
+            <header th:replace="fragments/dashboard-header :: header('main')"></header>
+        </th:block>
+
+        <main th:if="${session.loginMember == null}">
             <section class="landing-hero">
                 <div class="landing-shell landing-hero-inner">
-                    <p class="landing-kicker">PERSONAL FITNESS LOG</p>
-                    <h1 class="landing-title">
-                        기록을 쌓고,<br>
-                        나만의 운동 루틴을 완성하세요.
-                    </h1>
-                    <p class="landing-description">
-                        루틴을 만들고 세트별 중량과 횟수를 기록해<br>
-                        나의 운동 이력을 관리할 수 있습니다.
-                    </p>
-                    <a class="btn btn-primary landing-cta" th:href="@{/member/login}"
-                       th:if="${session.loginMember == null}">운동 시작하기</a>
+                    <div class="landing-hero-copy">
+                        <p class="landing-kicker">PERSONAL FITNESS LOG</p>
+                        <h1 class="landing-title">
+                            <span>기록을 쌓고,</span>
+                            <span>나만의 운동 루틴을</span>
+                            <span>완성하세요.</span>
+                        </h1>
+                        <p class="landing-description">
+                            루틴을 만들고 세트별 중량과 횟수를 기록해<br>
+                            운동의 변화를 확인하세요.
+                        </p>
+                        <div class="landing-actions">
+                            <a class="btn btn-primary landing-cta" th:href="@{/member/login}">운동 시작하기</a>
+                            <a class="landing-explore-link" href="#features">기능 둘러보기 <span aria-hidden="true">↓</span></a>
+                        </div>
+                    </div>
+
+                    <figure class="landing-preview" aria-label="운동 기록 기능을 보여주는 정적 화면 예시">
+                        <figcaption class="landing-preview-caption">
+                            <span>kosaFitLog 화면 예시</span>
+                            <small>실제 회원 데이터가 아닙니다</small>
+                        </figcaption>
+                        <div class="landing-preview-surface" aria-hidden="true">
+                            <div class="preview-topline">
+                                <strong>kosaFitLog!</strong>
+                                <span>운동 기록</span>
+                            </div>
+                            <div class="preview-session">
+                                <div>
+                                    <p>진행 중인 루틴 · 예시</p>
+                                    <h2>상체 루틴</h2>
+                                </div>
+                                <span class="preview-status">진행 중</span>
+                            </div>
+                            <div class="preview-exercise">
+                                <div class="preview-exercise-heading">
+                                    <strong>벤치프레스</strong>
+                                    <span>가슴</span>
+                                </div>
+                                <table class="preview-set-table">
+                                    <thead><tr><th>SET</th><th>KG</th><th>REPS</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>01</td><td>40</td><td>10</td></tr>
+                                        <tr><td>02</td><td>42.5</td><td>9</td></tr>
+                                        <tr><td>03</td><td>45</td><td>8</td></tr>
+                                    </tbody>
+                                </table>
+                                <span class="preview-add-set">+ 세트 기록</span>
+                            </div>
+                            <div class="preview-calendar-strip">
+                                <div class="preview-calendar-heading">
+                                    <strong>운동한 날짜</strong>
+                                    <span>완료한 날을 한눈에</span>
+                                </div>
+                                <div class="preview-week">
+                                    <span><small>월</small><b></b></span>
+                                    <span class="is-trained"><small>화</small><b></b></span>
+                                    <span><small>수</small><b></b></span>
+                                    <span class="is-trained"><small>목</small><b></b></span>
+                                    <span><small>금</small><b></b></span>
+                                    <span class="is-trained"><small>토</small><b></b></span>
+                                    <span><small>일</small><b></b></span>
+                                </div>
+                            </div>
+                        </div>
+                    </figure>
                 </div>
             </section>
 
-            <section class="landing-features" aria-label="주요 기능">
-                <div class="landing-shell main-card-grid">
-                    <article class="card main-feature-card">
-                        <span class="main-feature-icon" aria-hidden="true">▣</span>
-                        <h2 class="main-feature-title">나만의 운동 루틴</h2>
-                        <p class="main-feature-description">
-                            원하는 운동을 조합해 나만의 루틴을 구성합니다.
-                        </p>
-                        <a class="btn btn-primary" th:href="@{/routine/list}"
-                           th:if="${session.loginMember != null}">내 루틴 보기</a>
-                    </article>
-
-                    <article class="card main-feature-card">
-                        <span class="main-feature-icon" aria-hidden="true">◷</span>
-                        <h2 class="main-feature-title">운동 기록</h2>
-                        <p class="main-feature-description">
-                            세트별 중량과 횟수를 기록하고 지난 운동을 확인합니다.
-                        </p>
-                        <a class="btn btn-secondary" th:href="@{/workout/list}"
-                           th:if="${session.loginMember != null}">운동 기록 보기</a>
-                    </article>
+            <section id="features" class="landing-features" aria-labelledby="landingFeaturesTitle">
+                <div class="landing-shell">
+                    <div class="landing-features-heading">
+                        <p>ROUTINE → RECORD → PROGRESS</p>
+                        <h2 id="landingFeaturesTitle">운동의 흐름을 한곳에서.</h2>
+                    </div>
+                    <ol class="landing-flow">
+                        <li class="landing-flow-step">
+                            <div class="landing-flow-copy">
+                                <span class="landing-flow-index"><strong>01</strong> ROUTINE</span>
+                                <h3>루틴 구성</h3>
+                                <p>원하는 운동을 조합해 나만의 운동 루틴을 구성합니다.</p>
+                            </div>
+                            <div class="landing-flow-visual landing-flow-visual-routine">
+                                <span class="landing-flow-sample">화면 예시 · 실제 회원 데이터 아님</span>
+                                <div class="flow-routine-panel" aria-hidden="true">
+                                    <div class="flow-panel-topline"><span>MY ROUTINE</span><span>운동 3개</span></div>
+                                    <div class="flow-routine-title"><strong>상체 루틴</strong><span>구성 운동</span></div>
+                                    <div class="flow-routine-item"><span>01</span><strong>벤치프레스</strong><small>가슴</small></div>
+                                    <div class="flow-routine-item"><span>02</span><strong>랫풀다운</strong><small>등</small></div>
+                                    <div class="flow-routine-item"><span>03</span><strong>숄더 프레스</strong><small>어깨</small></div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="landing-flow-step">
+                            <div class="landing-flow-copy">
+                                <span class="landing-flow-index"><strong>02</strong> RECORD</span>
+                                <h3>세트 기록</h3>
+                                <p>운동 중 중량과 반복 횟수를 세트별로 빠르게 기록합니다.</p>
+                            </div>
+                            <div class="landing-flow-visual landing-flow-visual-record">
+                                <span class="landing-flow-sample">화면 예시 · 실제 회원 데이터 아님</span>
+                                <div class="flow-record-panel" aria-hidden="true">
+                                    <div class="flow-panel-topline"><span>벤치프레스</span><span>세트 기록</span></div>
+                                    <div class="flow-record-row"><span>SET 01</span><strong>40 <small>kg</small></strong><strong>10 <small>reps</small></strong></div>
+                                    <div class="flow-record-row"><span>SET 02</span><strong>42.5 <small>kg</small></strong><strong>9 <small>reps</small></strong></div>
+                                    <div class="flow-record-row"><span>SET 03</span><strong>45 <small>kg</small></strong><strong>8 <small>reps</small></strong></div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="landing-flow-step">
+                            <div class="landing-flow-copy">
+                                <span class="landing-flow-index"><strong>03</strong> PROGRESS</span>
+                                <h3>변화 확인</h3>
+                                <p>운동 기록과 체성분 데이터의 변화를 그래프로 확인합니다.</p>
+                            </div>
+                            <div class="landing-flow-visual landing-flow-visual-progress">
+                                <span class="landing-flow-sample">화면 예시 · 실제 회원 데이터 아님</span>
+                                <div class="flow-progress-panel" aria-hidden="true">
+                                    <div class="flow-panel-topline"><span>운동 통계</span><span>MAX WEIGHT</span></div>
+                                    <div class="flow-progress-heading"><span>벤치프레스 · 최대 중량</span><strong>45 <small>kg</small></strong></div>
+                                    <svg class="flow-progress-chart" viewBox="0 0 420 112" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+                                        <path class="flow-chart-grid" d="M0 24H420 M0 64H420 M0 104H420" />
+                                        <path class="flow-chart-line" d="M12 88 L150 70 L278 48 L408 22" />
+                                        <circle cx="12" cy="88" r="5" /><circle cx="150" cy="70" r="5" />
+                                        <circle cx="278" cy="48" r="5" /><circle cx="408" cy="22" r="5" />
+                                    </svg>
+                                    <div class="flow-progress-axis"><span>기록 시작</span><span>최근 기록</span></div>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
                 </div>
             </section>
         </main>
+
+        <main class="dashboard-main" th:if="${session.loginMember != null}">
+            <div class="dashboard-shell">
+                <div class="dashboard-heading">
+                    <div>
+                        <p class="dashboard-eyebrow">TRAINING DESK / 오늘의 운동</p>
+                        <h1>운동을 이어갈 시간입니다.</h1>
+                    </div>
+                    <span class="dashboard-heading-member">안녕하세요, <strong th:text="${session.loginMember.nickname}">회원</strong>님</span>
+                </div>
+
+                <div class="dashboard-top-grid">
+                    <section class="dashboard-start" aria-labelledby="startTitle">
+                        <p class="dashboard-section-index">01 <span>오늘의 운동</span></p>
+                        <h2 id="startTitle">루틴을 고르고<br>기록을 시작하세요.</h2>
+                        <p>운동을 시작하면 종목별 중량과 반복 횟수를 바로 기록할 수 있습니다.</p>
+                        <a class="dashboard-start-link" th:href="@{/routine/list}">
+                            내 루틴에서 운동 시작 <span aria-hidden="true">↗</span>
+                        </a>
+                        <div class="dashboard-start-footer">
+                            <a th:href="@{/routine/list}">루틴 보기</a>
+                            <a th:href="@{/workout/list}">지난 기록 보기</a>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-recent" aria-labelledby="recentTitle">
+                        <div class="dashboard-panel-heading">
+                            <div>
+                                <p class="dashboard-section-index">02 <span>최근 기록</span></p>
+                                <h2 id="recentTitle">마지막 운동일</h2>
+                            </div>
+                            <a class="dashboard-inline-link" th:href="@{/workout/list}">전체 기록 ↗</a>
+                        </div>
+                        <div id="recentWorkoutPanel" class="dashboard-recent-data" hidden>
+                            <time id="recentWorkoutDate" class="dashboard-recent-date"></time>
+                            <a id="recentWorkoutLink" class="dashboard-inline-link" th:href="@{/workout/list}">이 날짜의 기록 보기 →</a>
+                        </div>
+                        <p id="recentWorkoutEmpty" class="dashboard-recent-empty" hidden>아직 완료한 운동이 없습니다. 첫 운동을 기록해보세요.</p>
+                        <div class="dashboard-recent-total">
+                            <span>전체 운동한 날</span>
+                            <strong><span id="totalTrainingDays">0</span><small>일</small></strong>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="dashboard-bottom-grid">
+                    <section class="dashboard-calendar" aria-labelledby="calendarTitle">
+                        <div class="dashboard-panel-heading">
+                            <div>
+                                <p class="dashboard-section-index">03 <span>운동 이력</span></p>
+                                <h2 id="calendarTitle">운동 캘린더</h2>
+                            </div>
+                            <span class="dashboard-panel-note">날짜를 눌러 기록을 확인하세요</span>
+                        </div>
+                    <div class="calendar-card">
+                        <div class="calendar-toolbar">
+                            <button id="calendarPrev" type="button" aria-label="이전 달">&lt; 이전</button>
+                            <strong id="calendarMonth" class="calendar-month" aria-live="polite"></strong>
+                            <button id="calendarNext" type="button" aria-label="다음 달">다음 &gt;</button>
+                        </div>
+                        <div class="calendar-grid calendar-weekdays" aria-hidden="true">
+                            <span>일</span><span>월</span><span>화</span><span>수</span>
+                            <span>목</span><span>금</span><span>토</span>
+                        </div>
+                        <div id="calendarDays" class="calendar-grid" aria-label="완료한 운동 날짜"></div>
+                        <p id="calendarEmpty" class="calendar-empty" role="status" hidden>아직 완료한 운동 기록이 없습니다.</p>
+                        <div class="dashboard-calendar-footer">
+                            <span>선택한 달의 운동일</span>
+                            <strong id="calendarMonthCount">0일</strong>
+                        </div>
+                    </div>
+                    </section>
+
+                    <section class="dashboard-explore" aria-labelledby="exploreTitle">
+                        <div class="dashboard-panel-heading">
+                            <div>
+                                <p class="dashboard-section-index">04 <span>기록 분석</span></p>
+                                <h2 id="exploreTitle">기록을 더 살펴보기</h2>
+                            </div>
+                        </div>
+                        <a class="dashboard-explore-link" th:href="@{/statistics}">
+                            <span><strong>운동 통계</strong><small>중량 · 볼륨 · 예상 1RM</small></span>
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                        <a class="dashboard-explore-link" th:href="@{/body-composition}">
+                            <span><strong>체성분 기록</strong><small>체중 · 골격근량 · 체지방률</small></span>
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                        <a class="dashboard-explore-link" th:href="@{/workout/list}">
+                            <span><strong>전체 운동 기록</strong><small>완료한 운동과 진행 중인 기록</small></span>
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </main>
+        <script th:if="${session.loginMember != null}" th:inline="javascript">
+            const workoutDates = /*[[${workoutDates}]]*/ [];
+            const workoutListUrl = /*[[@{/workout/list}]]*/ '/workout/list';
+            const completedDates = new Set(Array.isArray(workoutDates) ? workoutDates : []);
+            const latestCalendarDate = [...completedDates].sort().pop();
+            const today = new Date();
+            const recentWorkoutPanel = document.getElementById('recentWorkoutPanel');
+            const recentWorkoutEmpty = document.getElementById('recentWorkoutEmpty');
+            document.getElementById('totalTrainingDays').textContent = completedDates.size;
+            if (latestCalendarDate) {
+                document.getElementById('recentWorkoutDate').textContent = latestCalendarDate.replaceAll('-', '.');
+                document.getElementById('recentWorkoutDate').dateTime = latestCalendarDate;
+                document.getElementById('recentWorkoutLink').href = workoutListUrl + '?date=' + encodeURIComponent(latestCalendarDate);
+                recentWorkoutPanel.hidden = false;
+            } else {
+                recentWorkoutEmpty.hidden = false;
+            }
+            let calendarYear = latestCalendarDate
+                ? Number(latestCalendarDate.slice(0, 4)) : today.getFullYear();
+            let calendarMonth = latestCalendarDate
+                ? Number(latestCalendarDate.slice(5, 7)) - 1 : today.getMonth();
+            const calendarMonthLabel = document.getElementById('calendarMonth');
+            const calendarDays = document.getElementById('calendarDays');
+            document.getElementById('calendarEmpty').hidden = completedDates.size > 0;
+
+            function renderCalendar() {
+                calendarMonthLabel.textContent = calendarYear + '년 ' + (calendarMonth + 1) + '월';
+                calendarDays.replaceChildren();
+                const monthPrefix = calendarYear + '-' + String(calendarMonth + 1).padStart(2, '0') + '-';
+                const monthCount = [...completedDates].filter(date => date.startsWith(monthPrefix)).length;
+                document.getElementById('calendarMonthCount').textContent = monthCount + '일';
+
+                const firstWeekday = new Date(calendarYear, calendarMonth, 1).getDay();
+                const dayCount = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+                for (let i = 0; i < firstWeekday; i++) {
+                    const blank = document.createElement('span');
+                    blank.className = 'calendar-day';
+                    blank.setAttribute('aria-hidden', 'true');
+                    calendarDays.appendChild(blank);
+                }
+
+                for (let day = 1; day <= dayCount; day++) {
+                    const date = calendarYear + '-' + String(calendarMonth + 1).padStart(2, '0')
+                        + '-' + String(day).padStart(2, '0');
+                    const completed = completedDates.has(date);
+                    const cell = document.createElement(completed ? 'a' : 'span');
+                    cell.className = 'calendar-day';
+                    cell.textContent = day;
+                    if (completed) {
+                        cell.classList.add('workout-day');
+                        cell.href = workoutListUrl + '?date=' + encodeURIComponent(date);
+                        cell.setAttribute('aria-label', date + ' 운동 기록 보기');
+                    }
+                    if (calendarYear === today.getFullYear()
+                            && calendarMonth === today.getMonth() && day === today.getDate()) {
+                        cell.classList.add('today');
+                    }
+                    calendarDays.appendChild(cell);
+                }
+            }
+
+            document.getElementById('calendarPrev').addEventListener('click', () => {
+                const previousMonth = new Date(calendarYear, calendarMonth - 1, 1);
+                calendarYear = previousMonth.getFullYear();
+                calendarMonth = previousMonth.getMonth();
+                renderCalendar();
+            });
+            document.getElementById('calendarNext').addEventListener('click', () => {
+                const nextMonth = new Date(calendarYear, calendarMonth + 1, 1);
+                calendarYear = nextMonth.getFullYear();
+                calendarMonth = nextMonth.getMonth();
+                renderCalendar();
+            });
+            renderCalendar();
+        </script>
     </div>
 </body>
 </html>

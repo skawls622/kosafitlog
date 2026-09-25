@@ -8,21 +8,20 @@
             <a class="nav-item"
                th:classappend="${activePage == 'main'} ? ' active' : ''"
                th:href="@{/main}">
-                <span class="nav-icon" aria-hidden="true">⌂</span>
                 <span>메인</span>
             </a>
             <a class="nav-item"
                th:classappend="${activePage == 'routines'} ? ' active' : ''"
                th:href="@{/routine/list}">
-                <span class="nav-icon" aria-hidden="true">▣</span>
                 <span>내 루틴</span>
             </a>
             <a class="nav-item"
                th:classappend="${activePage == 'workouts'} ? ' active' : ''"
                th:href="@{/workout/list}">
-                <span class="nav-icon" aria-hidden="true">◷</span>
                 <span>운동 기록</span>
             </a>
+            <a class="nav-item" th:href="@{/statistics}"><span>운동 통계</span></a>
+            <a class="nav-item" th:href="@{/body-composition}"><span>체성분</span></a>
         </nav>
 
         <div class="sidebar-user">

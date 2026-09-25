@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <header class="dashboard-header" th:fragment="header(activePage)">
+        <div class="dashboard-shell dashboard-header-inner">
+            <a class="dashboard-brand" th:href="@{/main}" aria-label="kosaFitLog 메인">kosa<span>FitLog!</span></a>
+            <nav class="dashboard-nav" aria-label="주요 메뉴">
+                <a th:classappend="${activePage == 'main'} ? ' is-current' : ''"
+                   th:attr="aria-current=${activePage == 'main' ? 'page' : null}"
+                   th:href="@{/main}">오늘</a>
+                <a th:classappend="${activePage == 'routines'} ? ' is-current' : ''"
+                   th:attr="aria-current=${activePage == 'routines' ? 'page' : null}"
+                   th:href="@{/routine/list}">루틴</a>
+                <a th:classappend="${activePage == 'workouts'} ? ' is-current' : ''"
+                   th:attr="aria-current=${activePage == 'workouts' ? 'page' : null}"
+                   th:href="@{/workout/list}">기록</a>
+                <a th:classappend="${activePage == 'statistics'} ? ' is-current' : ''"
+                   th:attr="aria-current=${activePage == 'statistics' ? 'page' : null}"
+                   th:href="@{/statistics}">통계</a>
+                <a th:classappend="${activePage == 'bodyComposition'} ? ' is-current' : ''"
+                   th:attr="aria-current=${activePage == 'bodyComposition' ? 'page' : null}"
+                   th:href="@{/body-composition}">체성분</a>
+            </nav>
+            <div class="dashboard-account">
+                <span class="dashboard-account-name" th:text="${session.loginMember.nickname}">회원</span>
+                <form th:action="@{/member/logout}" method="post">
+                    <button class="dashboard-logout" type="submit">로그아웃</button>
+                </form>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

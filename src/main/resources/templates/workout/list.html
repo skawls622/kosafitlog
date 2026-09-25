@@ -14,14 +14,18 @@
             <div class="content-shell">
                 <header class="page-header">
                     <div>
-                        <h1 class="page-title">운동 기록</h1>
+                        <h1 class="page-title"
+                            th:text="${selectedDate != null ? selectedDate.toString() + ' 운동 기록' : '운동 기록'}">운동 기록</h1>
                         <p class="page-description">최근 운동과 세트 기록을 다시 확인할 수 있어요.</p>
                     </div>
+                    <a class="btn btn-secondary" th:if="${selectedDate != null}"
+                       th:href="@{/workout/list}">전체 운동 기록 보기</a>
                 </header>
 
                 <section class="card empty-state" th:if="${#lists.isEmpty(workoutLogs)}">
-                    <h2 class="empty-state-title">아직 운동 기록이 없습니다</h2>
-                    <p class="empty-state-text">루틴을 선택해 첫 운동을 시작해보세요.</p>
+                    <h2 class="empty-state-title"
+                        th:text="${selectedDate != null ? '선택한 날짜에 완료된 운동 기록이 없습니다' : '아직 운동 기록이 없습니다'}">아직 운동 기록이 없습니다</h2>
+                    <p class="empty-state-text" th:if="${selectedDate == null}">루틴을 선택해 첫 운동을 시작해보세요.</p>
                 </section>
 
                 <section class="card history-card" th:unless="${#lists.isEmpty(workoutLogs)}">
