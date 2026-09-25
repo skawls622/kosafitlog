@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -176,6 +177,23 @@ class WorkoutServiceTests {
 
         assertThat(service().getWorkoutLogs(10L)).containsExactly(log);
         verify(workoutLogMapper).findAllByMemberId(10L);
+    }
+
+    @Test
+    void completedDatesAndAllWorkoutsForOneDateStayScopedToMember() {
+        LocalDate date = LocalDate.of(2026, 9, 23);
+        WorkoutLogDTO first = new WorkoutLogDTO();
+        WorkoutLogDTO second = new WorkoutLogDTO();
+        when(workoutLogMapper.findCompletedWorkoutDates(10L))
+                .thenReturn(Arrays.asList(date));
+        when(workoutLogMapper.findCompletedByMemberIdAndDate(10L, date))
+                .thenReturn(Arrays.asList(first, second));
+
+        assertThat(service().getCompletedWorkoutDates(10L)).containsExactly(date);
+        assertThat(service().getCompletedWorkoutLogsByDate(10L, date))
+                .containsExactly(first, second);
+        verify(workoutLogMapper).findCompletedWorkoutDates(10L);
+        verify(workoutLogMapper).findCompletedByMemberIdAndDate(10L, date);
     }
 
     private RoutineExerciseDTO routineExercise(Long exerciseId,

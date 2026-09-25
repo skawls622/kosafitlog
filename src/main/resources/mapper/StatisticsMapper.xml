@@ -81,12 +81,4 @@
 
 	</select>
 
-	<select id="findCompletedWorkoutDates" resultType="java.time.LocalDate">
-		SELECT DISTINCT TRUNC(workout_date) AS workout_date
-		FROM workout_logs
-		WHERE member_id = #{memberId}
-			AND updated_at IS NOT NULL
-		ORDER BY workout_date
-	</select>
-
 </mapper>

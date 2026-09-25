@@ -14,6 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -165,6 +167,28 @@ class WorkoutControllerTests {
                 .andExpect(model().attributeExists("workoutLogs"));
 
         verify(workoutService).getWorkoutLogs(10L);
+    }
+
+    @Test
+    void dateFilterShowsEveryCompletedWorkoutForSessionMember() throws Exception {
+        LocalDate date = LocalDate.of(2026, 9, 23);
+        WorkoutLogDTO first = new WorkoutLogDTO();
+        first.setWorkoutLogId(100L);
+        WorkoutLogDTO second = new WorkoutLogDTO();
+        second.setWorkoutLogId(101L);
+        when(workoutService.getCompletedWorkoutLogsByDate(10L, date))
+                .thenReturn(Arrays.asList(first, second));
+
+        mockMvc.perform(get("/workout/list").session(loginSession)
+                .param("memberId", "999")
+                .param("date", "2026-09-23"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("workout/list"))
+                .andExpect(model().attribute("selectedDate", date))
+                .andExpect(model().attribute("workoutLogs", Arrays.asList(first, second)));
+
+        verify(workoutService).getCompletedWorkoutLogsByDate(10L, date);
+        verify(workoutService, never()).getWorkoutLogs(any());
     }
 
     @Test

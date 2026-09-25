@@ -1,6 +1,5 @@
 package com.kosa.fitlog.statistics.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -36,11 +35,8 @@ public class StatisticsController {
 
         List<StatisticsDTO> statisticsList =
                 statisticsService.findExerciseStatistics(memberId);
-        List<LocalDate> workoutDates =
-                statisticsService.findCompletedWorkoutDates(memberId);
 
         model.addAttribute("statisticsList", statisticsList);
-        model.addAttribute("workoutDates", workoutDates);
 
         return "statistics/index";
     }

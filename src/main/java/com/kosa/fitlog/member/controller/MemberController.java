@@ -65,7 +65,7 @@ public class MemberController {
         request.changeSessionId();
         session.setAttribute("loginMember",
                 new LoginMember(member.getMemberId(), member.getLoginId(), member.getNickname()));
-        return "redirect:/routine/list";
+        return "redirect:/main";
     }
 
     @GetMapping("/login-success")
@@ -85,6 +85,6 @@ public class MemberController {
         if (session != null) {
             session.invalidate();
         }
-        return "redirect:/member/login";
+        return "redirect:/main";
     }
 }

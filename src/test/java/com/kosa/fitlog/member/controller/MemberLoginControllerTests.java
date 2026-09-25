@@ -51,7 +51,7 @@ class MemberLoginControllerTests {
                 .param("loginId", "known")
                 .param("password", "correct-password"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/routine/list"))
+                .andExpect(redirectedUrl("/main"))
                 .andReturn();
 
         HttpSession session = result.getRequest().getSession(false);

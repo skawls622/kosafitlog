@@ -1,6 +1,5 @@
 package com.kosa.fitlog.statistics.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +20,4 @@ public class StatisticsService {
         return statisticsMapper.findExerciseStatistics(memberId);
     }
 
-    public List<LocalDate> findCompletedWorkoutDates(Long memberId) {
-        return statisticsMapper.findCompletedWorkoutDates(memberId);
-    }
 }

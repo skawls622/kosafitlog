@@ -1,6 +1,7 @@
 package com.kosa.fitlog.workout.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,14 +101,20 @@ public class WorkoutController {
     }
 
     @GetMapping("/list")
-    public String list(HttpServletRequest request, Model model) {
+    public String list(
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            HttpServletRequest request, Model model) {
         LoginMember loginMember = getLoginMember(request);
         if (loginMember == null) {
             return "redirect:/member/login";
         }
 
-        model.addAttribute("workoutLogs",
-                workoutService.getWorkoutLogs(loginMember.getMemberId()));
+        Long memberId = loginMember.getMemberId();
+        model.addAttribute("workoutLogs", date == null
+                ? workoutService.getWorkoutLogs(memberId)
+                : workoutService.getCompletedWorkoutLogsByDate(memberId, date));
+        model.addAttribute("selectedDate", date);
         return "workout/list";
     }
 

@@ -1,5 +1,6 @@
 package com.kosa.fitlog.workout.service;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,5 +93,19 @@ public class WorkoutService {
             return Collections.emptyList();
         }
         return workoutLogMapper.findAllByMemberId(memberId);
+    }
+
+    public List<LocalDate> getCompletedWorkoutDates(Long memberId) {
+        if (memberId == null) {
+            return Collections.emptyList();
+        }
+        return workoutLogMapper.findCompletedWorkoutDates(memberId);
+    }
+
+    public List<WorkoutLogDTO> getCompletedWorkoutLogsByDate(Long memberId, LocalDate date) {
+        if (memberId == null || date == null) {
+            return Collections.emptyList();
+        }
+        return workoutLogMapper.findCompletedByMemberIdAndDate(memberId, date);
     }
 }

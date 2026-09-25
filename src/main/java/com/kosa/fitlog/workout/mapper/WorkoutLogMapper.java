@@ -1,5 +1,6 @@
 package com.kosa.fitlog.workout.mapper;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -22,4 +23,11 @@ public interface WorkoutLogMapper {
 
     List<WorkoutLogDTO> findAllByMemberId(
             @Param("memberId") Long memberId);
+
+    List<LocalDate> findCompletedWorkoutDates(
+            @Param("memberId") Long memberId);
+
+    List<WorkoutLogDTO> findCompletedByMemberIdAndDate(
+            @Param("memberId") Long memberId,
+            @Param("date") LocalDate date);
 }
