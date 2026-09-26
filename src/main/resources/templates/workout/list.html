@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 운동 기록 목록</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .workout-list-page .main-content { margin-left: 0; }
+
+        @media (max-width: 640px) {
+            .workout-list-page .history-table th:nth-child(1) { width: 44%; }
+            .workout-list-page .history-table th:nth-child(2) { width: 24%; }
+            .workout-list-page .history-table th:nth-child(3) { width: 32%; }
+            .workout-list-page .history-table td:first-child { overflow-wrap: normal; }
+            .workout-list-page .history-table .badge { padding-inline: 8px; white-space: nowrap; }
+        }
+    </style>
 </head>
-<body>
+<body class="workout-list-page">
     <div class="app-layout">
-        <aside th:replace="fragments/sidebar :: sidebar('workouts')"></aside>
+        <header th:replace="fragments/dashboard-header :: header('workouts')"></header>
 
         <main class="main-content">
             <div class="content-shell">
@@ -39,7 +50,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="workoutLog : ${workoutLogs}">
-                                <td th:text="${workoutLog.workoutDate}"></td>
+                                <td th:text="${#temporals.format(workoutLog.workoutDate, 'yyyy.MM.dd HH:mm')}"></td>
                                 <td>
                                     <span class="badge"
                                           th:classappend="${workoutLog.updatedAt == null} ? ' badge-primary' : ' badge-success'"

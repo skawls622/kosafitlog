@@ -8,206 +8,155 @@
 	<link rel="stylesheet" th:href="@{/css/app.css}">
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
-		.body-composition-page {
-			width: min(100%, 1160px);
-			margin: 0 auto;
-			padding: 40px 24px 76px;
-		}
+        .body-composition-page { width: min(100%, 1248px); margin: 0 auto; padding: 24px 16px 64px; }
+        .body-composition-page > *, .body-composition-section, .measurement-form > * { min-width: 0; }
+        .body-composition-page .page-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; margin-bottom: 24px; padding: 0; border: 0; }
+        .body-composition-page .page-header > div { display: contents; }
+        .body-composition-page .page-title { font-size: 28px; line-height: 1.25; letter-spacing: -0.05em; }
+        .body-composition-page .page-description { grid-column: 1 / -1; grid-row: 2; margin: 0; font-size: 13px; }
+        .body-composition-page .body-composition-statistics-link { grid-column: 2; grid-row: 1; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--kf-text-secondary); font-size: 12px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+        .body-composition-section { margin-top: 32px; }
+        .body-composition-page .card { border: 0; border-radius: 0; background: transparent; }
+        .body-composition-page .card-body { padding: 0; }
+        .section-heading { margin: 0 0 18px; font-size: 20px; letter-spacing: -0.04em; line-height: 1.35; }
 
-		.body-composition-section {
-			margin-top: 32px;
-		}
+        /* One recording area; each mobile row has a label, input and visible unit. */
+        .measurement-section { padding: 20px 0 24px; margin-top: 0; border-top: 2px solid var(--kf-text-primary); border-bottom: 1px solid var(--kf-border-default); }
+        .measurement-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+        .measurement-form .form-group { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 12px; align-items: center; }
+        .measurement-form .form-label { margin: 0; font-size: 13px; font-weight: 500; }
+        .measurement-input { position: relative; min-width: 0; }
+        .measurement-form .form-control { min-width: 0; width: 100%; min-height: 54px; padding: 10px 42px 10px 12px; border-color: var(--kf-border-default); border-radius: 6px; background: var(--kf-bg-surface); color: var(--kf-text-primary); font-size: 23px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .measurement-form input[type="date"] { padding: 10px 12px; font-size: 16px; font-weight: 500; }
+        .measurement-form .form-control::placeholder { font-size: 14px; font-weight: 400; color: var(--kf-text-secondary); }
+        .measurement-form .form-control:focus-visible { outline: 2px solid var(--kf-action-primary); outline-offset: 3px; }
+        .measurement-input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--kf-text-secondary); font-size: 13px; pointer-events: none; }
+        .measurement-form .button-row { margin-top: 4px; }
+        .measurement-form .btn { min-height: 50px; width: 100%; border-radius: 6px; font-size: 15px; }
+        .body-composition-page .form-help { margin: 14px 0 0; color: var(--kf-text-secondary); font-size: 12px; line-height: 1.8; }
 
-		.body-composition-back {
-			display: inline-flex;
-			min-height: 44px;
-			align-items: center;
-			margin-bottom: 12px;
-		}
+        .chart-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .chart-header .section-heading { margin: 0; }
+        .chart-select { width: 140px; max-width: 50%; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid var(--kf-border-default); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 16px; }
+        .measurement-reading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
+        .measurement-reading > div { min-width: 0; }
+        .measurement-reading-label { margin: 0 0 4px; color: var(--kf-text-secondary); font-size: 12px; }
+        .measurement-reading-value { margin: 0; color: var(--kf-action-primary); font-size: clamp(38px, 5vw, 52px); font-weight: 650; line-height: 1.2; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .measurement-reading-value span { margin-left: 6px; color: var(--kf-text-secondary); font-size: 14px; font-weight: 400; letter-spacing: 0; }
+        .measurement-reading-date { margin: 6px 0 0; color: var(--kf-text-secondary); font-size: 12px; }
+        .measurement-history-link { flex-shrink: 0; display: inline-flex; align-items: center; min-height: 44px; color: var(--kf-text-secondary); font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+        .body-composition-page .chart-panel { position: relative; width: 100%; min-width: 0; height: 320px; }
+        .body-composition-page .chart-panel canvas { max-width: 100%; }
+        .body-composition-page .chart-message { margin: 12px 0; padding: 48px 16px; border: 1px dashed var(--kf-border-default); color: var(--kf-text-secondary); text-align: center; font-size: 14px; }
+        .measurement-chart-guide { margin: 12px 0 0; color: var(--kf-text-secondary); font-size: 12px; line-height: 1.7; }
+        .feedback { margin: 16px 0; padding: 12px 16px; border-radius: 6px; font-size: 14px; overflow-wrap: anywhere; }
+        .feedback-error { border-left: 3px solid var(--kf-danger); color: #9B3535; background: #FCF1F1; }
+        .feedback-success { border-left: 3px solid var(--kf-success); color: #376C43; background: var(--kf-success-soft); }
 
-		.measurement-form {
-			display: grid;
-			grid-template-columns: repeat(4, minmax(0, 1fr));
-			gap: 16px;
-		}
-
-		.measurement-form .button-row {
-			grid-column: 1 / -1;
-			justify-content: flex-end;
-		}
-
-		.section-heading {
-			margin: 0 0 16px;
-			font-size: 25px;
-			letter-spacing: -0.04em;
-		}
-
-		.chart-header {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			justify-content: space-between;
-			gap: 12px;
-			margin-bottom: 16px;
-		}
-
-		.chart-header .section-heading {
-			margin: 0;
-		}
-
-		.chart-select {
-			min-width: 150px;
-			min-height: 44px;
-			padding: 8px 12px;
-			border: 1px solid var(--kf-border-default);
-			border-radius: 8px;
-			background: #FFFFFF;
-			color: inherit;
-			font: inherit;
-		}
-
-		.chart-panel {
-			position: relative;
-			width: 100%;
-			height: 380px;
-		}
-
-		.chart-message {
-			margin: 0;
-			padding: 24px;
-			color: var(--kf-text-secondary);
-		}
-
-		.feedback {
-			margin: 16px 0;
-			padding: 12px 16px;
-			border-radius: 8px;
-		}
-
-		.feedback-error {
-			color: #9B3535;
-			background: #FCF1F1;
-		}
-
-		.feedback-success {
-			color: #376C43;
-			background: var(--kf-success-soft);
-		}
-
-		.record-scroll {
-			max-width: 100%;
-			overflow-x: auto;
-		}
-
-		.record-table {
-			width: 100%;
-			min-width: 620px;
-			border-collapse: collapse;
-		}
-
-		.record-table th,
-		.record-table td {
-			padding: 13px 14px;
-			border-bottom: 1px solid var(--kf-border-default);
-			text-align: left;
-		}
-
-		.record-table th {
-			color: var(--kf-text-secondary);
-			font-size: 13px;
-		}
-
-		.record-table tbody tr:last-child td {
-			border-bottom: 0;
-		}
-
-		.record-table form {
-			margin: 0;
-		}
-
-		@media (max-width: 720px) {
-			.measurement-form {
-				grid-template-columns: repeat(2, minmax(0, 1fr));
-			}
-
-			.chart-panel {
-				height: 280px;
-			}
-		}
-
-		@media (max-width: 480px) {
-			.body-composition-page { padding: 22px 16px 56px; }
-			.measurement-form {
-				grid-template-columns: 1fr;
-			}
-
-			.measurement-form .button-row,
-			.measurement-form .btn {
-				width: 100%;
-			}
-
-			.chart-select {
-				width: 100%;
-			}
-
-			.card-body {
-				padding: 20px;
-			}
-		}
-	</style>
+        /* The same table and delete forms become compact measurement rows on mobile. */
+        .measurement-history { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--kf-border-default); }
+        .measurement-history .section-heading { margin-bottom: 8px; scroll-margin-top: 24px; }
+        .measurement-history-note { margin: 0 0 16px; color: var(--kf-text-secondary); font-size: 12px; }
+        .record-scroll { max-width: 100%; }
+        .record-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        .record-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+        .record-table, .record-table tbody { display: block; }
+        .record-table tbody tr { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 16px 0 20px; border-bottom: 1px solid var(--kf-border-default); }
+        .record-table td { min-width: 0; padding: 0; font-size: 22px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+        .record-table td:first-child { display: flex; align-items: center; grid-column: 1 / -1; min-height: 44px; padding-right: 62px; font-size: 15px; font-weight: 600; }
+        .record-table td[data-label]::before { display: block; content: attr(data-label); margin-bottom: 5px; color: var(--kf-text-secondary); font-size: 11px; font-weight: 400; }
+        .record-table td:last-child { position: absolute; top: 16px; right: 0; }
+        .record-table form { margin: 0; }
+        .record-table .btn-danger-soft { min-width: 48px; min-height: 44px; padding: 0 10px; border: 1px solid var(--kf-border-default); border-radius: 6px; background: transparent; color: #9B3535; font-size: 12px; font-weight: 500; }
+        .record-table .btn-danger-soft:hover { border-color: var(--kf-danger); }
+        .body-composition-page .empty-state { padding: 32px 16px; border: 1px dashed var(--kf-border-default); border-radius: 6px; }
+        @media (min-width: 700px) {
+            .body-composition-page { padding: 28px 24px 80px; }
+            .measurement-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+            .measurement-form .form-group { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+            .measurement-form .button-row { grid-column: 1 / -1; justify-content: flex-end; }
+            .measurement-form .btn { width: auto; min-width: 128px; }
+            .body-composition-page .chart-panel { height: 400px; }
+            .record-table { display: table; }
+            .record-table thead { position: static; display: table-header-group; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
+            .record-table tbody { display: table-row-group; }
+            .record-table tbody tr { position: static; display: table-row; padding: 0; }
+            .record-table th, .record-table td { padding: 14px 16px; border-bottom: 1px solid var(--kf-border-default); text-align: right; vertical-align: middle; }
+            .record-table th { color: var(--kf-text-secondary); font-size: 12px; font-weight: 500; }
+            .record-table td { font-size: 18px; font-weight: 500; }
+            .record-table td:first-child { display: table-cell; padding: 14px 16px; font-size: 14px; text-align: left; }
+            .record-table th:first-child { text-align: left; }
+            .record-table td:last-child { position: static; }
+            .record-table td[data-label]::before { display: none; }
+        }
+        @media (min-width: 1100px) {
+            .measurement-form { grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 20px; }
+            .measurement-form .button-row { grid-column: auto; margin: 0; }
+            .measurement-form .btn { min-height: 54px; }
+            .body-composition-page .chart-panel { height: 420px; }
+        }
+    </style>
 </head>
 
 <body>
 	<header th:replace="fragments/dashboard-header :: header('bodyComposition')"></header>
 	<main class="body-composition-page">
-		<a class="text-link body-composition-back" th:href="@{/main}">← 메인으로</a>
 		<header class="page-header">
 			<div>
-				<h1 class="page-title">체성분 기록</h1>
+				<h1 class="page-title">체성분</h1>
 				<p class="page-description">측정한 값을 날짜별로 기록하고 변화를 확인하세요.</p>
 			</div>
-			<a class="btn btn-secondary" th:href="@{/statistics}">운동 통계로</a>
+			<a class="btn btn-secondary body-composition-statistics-link" th:href="@{/statistics}">운동 통계로</a>
 		</header>
 
 		<p class="feedback feedback-error" role="alert" th:if="${recordError}" th:text="${recordError}"></p>
 		<p class="feedback feedback-error" role="alert" th:if="${deleteError}" th:text="${deleteError}"></p>
 		<p class="feedback feedback-success" role="status" th:if="${recordSuccess}" th:text="${recordSuccess}"></p>
 
-		<section class="body-composition-section" aria-labelledby="registerTitle">
-			<h2 id="registerTitle" class="section-heading">새 기록</h2>
+		<section class="body-composition-section measurement-section" aria-labelledby="registerTitle">
+			<h2 id="registerTitle" class="section-heading">측정값 입력</h2>
 			<div class="card card-body">
-				<form class="measurement-form" th:action="@{/body-composition/register}" method="post">
+				<form class="measurement-form" aria-describedby="measurementHelp" th:action="@{/body-composition/register}" method="post">
 					<div class="form-group">
 						<label class="form-label" for="measuredDate">측정일</label>
 						<input class="form-control" id="measuredDate" name="measuredDate" type="date"
 							th:attr="max=${today}" required>
 					</div>
 					<div class="form-group">
-						<label class="form-label" for="weight">체중 (kg)</label>
-						<input class="form-control" id="weight" name="weight" type="number" inputmode="decimal"
-							min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
+						<label class="form-label" for="weight">체중 <span class="sr-only">(kg)</span></label>
+						<div class="measurement-input">
+							<input class="form-control" id="weight" name="weight" type="number" inputmode="decimal"
+								min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
+							<span class="measurement-input-unit" aria-hidden="true">kg</span>
+						</div>
 					</div>
 					<div class="form-group">
-						<label class="form-label" for="skeletalMuscle">골격근량 (kg)</label>
-						<input class="form-control" id="skeletalMuscle" name="skeletalMuscle" type="number"
-							inputmode="decimal" min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
+						<label class="form-label" for="skeletalMuscle">골격근량 <span class="sr-only">(kg)</span></label>
+						<div class="measurement-input">
+							<input class="form-control" id="skeletalMuscle" name="skeletalMuscle" type="number"
+								inputmode="decimal" min="0.01" max="999.99" step="0.01" placeholder="선택 입력">
+							<span class="measurement-input-unit" aria-hidden="true">kg</span>
+						</div>
 					</div>
 					<div class="form-group">
-						<label class="form-label" for="bodyFatPercentage">체지방률 (%)</label>
-						<input class="form-control" id="bodyFatPercentage" name="bodyFatPercentage" type="number"
-							inputmode="decimal" min="0" max="100" step="0.01" placeholder="선택 입력">
+						<label class="form-label" for="bodyFatPercentage">체지방률 <span class="sr-only">(%)</span></label>
+						<div class="measurement-input">
+							<input class="form-control" id="bodyFatPercentage" name="bodyFatPercentage" type="number"
+								inputmode="decimal" min="0" max="100" step="0.01" placeholder="선택 입력">
+							<span class="measurement-input-unit" aria-hidden="true">%</span>
+						</div>
 					</div>
 					<div class="button-row">
 						<button class="btn btn-primary" type="submit">기록하기</button>
 					</div>
 				</form>
-				<p class="form-help">체중, 골격근량, 체지방률 중 하나 이상 입력해 주세요. 같은 날짜의 기록은 하나만 저장할 수 있습니다.</p>
+				<p id="measurementHelp" class="form-help">체중, 골격근량, 체지방률 중 하나 이상 입력해 주세요. 같은 날짜의 기록은 하나만 저장할 수 있습니다.</p>
 			</div>
 		</section>
 
 		<section class="body-composition-section" aria-labelledby="chartTitle">
 			<div class="chart-header">
-				<h2 id="chartTitle" class="section-heading">체성분 변화</h2>
+				<h2 id="chartTitle" class="section-heading">변화 추이</h2>
 				<select id="metricSelect" class="chart-select" aria-label="차트 지표 선택">
 					<option value="weight" selected>체중</option>
 					<option value="skeletalMuscle">골격근량</option>
@@ -215,33 +164,43 @@
 				</select>
 			</div>
 			<div class="card card-body">
-				<div id="chartPanel" class="chart-panel"><canvas id="bodyCompositionChart" role="img" aria-label="선택한 체성분 지표의 변화"></canvas></div>
+				<div id="currentMeasurement" class="measurement-reading" hidden>
+                    <div>
+                        <p id="measurementMetric" class="measurement-reading-label">최근 측정값</p>
+                        <p id="measurementValue" class="measurement-reading-value">-</p>
+                        <p id="measurementDate" class="measurement-reading-date"></p>
+                    </div>
+                    <a class="measurement-history-link" href="#historyTitle">날짜별 기록 ↓</a>
+                </div>
+                <div id="chartPanel" class="chart-panel"><canvas id="bodyCompositionChart" role="img" aria-label="선택한 체성분 지표의 변화" aria-describedby="measurementChartGuide"></canvas></div>
 				<p id="chartMessage" class="chart-message" role="status" hidden></p>
+                <p id="measurementChartGuide" class="measurement-chart-guide">입력된 측정값 사이를 선으로 연결합니다. 측정하지 않은 값은 기록 목록에서 -로 표시합니다.</p>
 			</div>
 		</section>
 
-		<section class="body-composition-section" aria-labelledby="historyTitle">
-			<h2 id="historyTitle" class="section-heading">기록 내역</h2>
+		<section class="body-composition-section measurement-history" aria-labelledby="historyTitle">
+			<h2 id="historyTitle" class="section-heading">측정 기록</h2>
+            <p class="measurement-history-note">잘못 입력한 기록은 삭제한 뒤 다시 등록할 수 있습니다.</p>
 			<div class="card">
 				<p class="empty-state" th:if="${#lists.isEmpty(bodyCompositionList)}">아직 체성분 기록이 없습니다.</p>
 				<div class="record-scroll" th:unless="${#lists.isEmpty(bodyCompositionList)}">
-					<table class="record-table">
-						<thead>
-							<tr>
-								<th>측정일</th>
-								<th>체중 (kg)</th>
-								<th>골격근량 (kg)</th>
-								<th>체지방률 (%)</th>
-								<th>삭제</th>
+					<table class="record-table" role="table" aria-label="날짜별 체성분 측정 기록">
+						<thead role="rowgroup">
+							<tr role="row">
+								<th scope="col" role="columnheader">측정일</th>
+								<th scope="col" role="columnheader">체중 (kg)</th>
+								<th scope="col" role="columnheader">골격근량 (kg)</th>
+								<th scope="col" role="columnheader">체지방률 (%)</th>
+								<th scope="col" role="columnheader">삭제</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr th:each="record : ${bodyCompositionList}">
-								<td th:text="${record.measuredDate}"></td>
-								<td th:text="${record.weight != null ? record.weight : '-'}"></td>
-								<td th:text="${record.skeletalMuscle != null ? record.skeletalMuscle : '-'}"></td>
-								<td th:text="${record.bodyFatPercentage != null ? record.bodyFatPercentage : '-'}"></td>
-								<td>
+						<tbody role="rowgroup">
+							<tr th:each="record : ${bodyCompositionList}" role="row">
+								<td role="cell" th:text="${record.measuredDate}"></td>
+								<td role="cell" data-label="체중 (kg)" th:text="${record.weight != null ? record.weight : '-'}"></td>
+								<td role="cell" data-label="골격근량 (kg)" th:text="${record.skeletalMuscle != null ? record.skeletalMuscle : '-'}"></td>
+								<td role="cell" data-label="체지방률 (%)" th:text="${record.bodyFatPercentage != null ? record.bodyFatPercentage : '-'}"></td>
+								<td role="cell">
 									<form th:action="@{/body-composition/delete}" method="post"
 										onsubmit="return confirm('이 기록을 삭제하시겠습니까?');">
 										<input type="hidden" name="bodyCompositionId"
@@ -272,7 +231,28 @@
 			const metricSelect = document.getElementById('metricSelect');
 			const chartPanel = document.getElementById('chartPanel');
 			const chartMessage = document.getElementById('chartMessage');
-			let bodyCompositionChart = null;
+            const currentMeasurement = document.getElementById('currentMeasurement');
+            const measurementMetric = document.getElementById('measurementMetric');
+            const measurementValue = document.getElementById('measurementValue');
+            const measurementDate = document.getElementById('measurementDate');
+            let bodyCompositionChart = null;
+
+            // 선택 지표가 실제로 입력된 가장 최근 날짜와 값을 표시한다. 원본 NULL은 유지한다.
+            function showLatestMeasurement(values, metric) {
+                currentMeasurement.hidden = chartRows.length === 0;
+                measurementMetric.textContent = '최근 ' + metric.label;
+                const latestIndex = values.reduce((latest, value, index) => value !== null ? index : latest, -1);
+                if (latestIndex === -1) {
+                    measurementValue.textContent = '-';
+                    measurementDate.textContent = '입력된 ' + metric.label + ' 기록이 없습니다.';
+                    return;
+                }
+                measurementValue.textContent = values[latestIndex].toLocaleString('ko-KR', {maximumFractionDigits: 2});
+                const unit = document.createElement('span');
+                unit.textContent = ' ' + metric.unit;
+                measurementValue.appendChild(unit);
+                measurementDate.textContent = chartRows[latestIndex].measuredDate + ' 측정';
+            }
 
 			function drawBodyCompositionChart() {
 				const metricName = metricSelect.value;
@@ -284,6 +264,8 @@
 					const value = Number(rawValue);
 					return Number.isFinite(value) ? value : null;
 				});
+
+                showLatestMeasurement(values, metric);
 
 				if (bodyCompositionChart != null) {
 					bodyCompositionChart.destroy();
@@ -314,6 +296,9 @@
 							borderColor: chartColor,
 							backgroundColor: chartColor,
 							borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            pointHitRadius: 12,
 							tension: 0.2,
 							spanGaps: true
 						}]
@@ -322,10 +307,16 @@
 						responsive: true,
 						maintainAspectRatio: false,
 						scales: {
-							y: {title: {display: true, text: metric.label + ' (' + metric.unit + ')'}}
+							x: {grid: {display: false}, ticks: {color: '#5F6963', maxRotation: 0, maxTicksLimit: 5}},
+                            y: {
+                                title: {display: false, text: metric.label + ' (' + metric.unit + ')'},
+                                ticks: {color: '#5F6963'}, grid: {color: '#E1E3DC'}
+                            }
 						},
 						plugins: {
+                            legend: {display: false},
 							tooltip: {
+                                backgroundColor: '#1B2220', padding: 12,
 								callbacks: {
 									label: context => context.parsed.y + ' ' + metric.unit
 								}

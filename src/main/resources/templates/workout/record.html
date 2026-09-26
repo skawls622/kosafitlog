@@ -6,14 +6,16 @@
     <title>kosaFitLog 운동 기록</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
+<body class="workout-record-page"
+      th:classappend="${workoutLog.updatedAt != null} ? ' record-readonly' : ''">
     <div class="app-layout">
-        <aside th:replace="fragments/sidebar :: sidebar('workouts')"></aside>
+        <header th:replace="fragments/dashboard-header :: header('workouts')"></header>
 
-        <main class="main-content">
+        <main class="main-content record-main">
             <div class="content-shell">
-                <header class="page-header">
+                <header class="page-header record-page-header">
                     <div>
+                        <p class="record-eyebrow">WORKOUT LOG</p>
                         <h1 class="page-title">운동 기록</h1>
                         <p class="page-description"
                            th:text="${workoutLog.updatedAt == null ? '오늘의 세트를 기록하고 운동을 완료하세요.' : '완료한 세트 기록을 확인하세요.'}">오늘의 세트를 기록하고 운동을 완료하세요.</p>
@@ -22,11 +24,16 @@
                                   th:classappend="${workoutLog.updatedAt == null} ? ' badge-primary' : ' badge-success'"
                                   th:text="${workoutLog.updatedAt == null ? '진행 중' : '완료'}"></span>
                             <span class="date-text" th:text="${workoutLog.workoutDate}"></span>
+                            <span class="record-exercise-count"><strong th:text="${#lists.size(workoutExercises)}"></strong>개 운동</span>
                         </div>
                     </div>
+                    <a class="record-complete-jump" href="#workoutComplete"
+                       th:if="${workoutLog.updatedAt == null}">운동 완료 영역으로 ↓</a>
                 </header>
 
-                <p class="alert" th:if="${setError}" th:text="${setError}"></p>
+                <p class="alert" role="alert" th:if="${setError}" th:text="${setError}"></p>
+
+                <p class="empty-state record-empty" th:if="${#lists.isEmpty(workoutExercises)}">등록된 운동이 없습니다.</p>
 
                 <ol class="exercise-stack">
                     <li class="card exercise-card"
@@ -34,11 +41,12 @@
                         th:with="sets=${workoutSetsByExerciseId[workoutExercise.workoutExerciseId]}">
                         <div class="exercise-card-header">
                             <div>
+                                <p class="record-exercise-marker" aria-hidden="true">EXERCISE</p>
                                 <h2 class="exercise-card-title">
                                     <span th:text="${workoutExercise.exerciseName}"></span>
-                                    <span class="badge badge-muted"
-                                          th:text="${workoutExercise.bodyPart}"></span>
                                 </h2>
+                                <span class="badge badge-muted record-body-part"
+                                      th:text="${workoutExercise.bodyPart}"></span>
                                 <p class="exercise-memo" th:if="${workoutExercise.memo}">
                                     운동 메모: <span th:text="${workoutExercise.memo}"></span>
                                 </p>
@@ -52,23 +60,24 @@
                         </p>
 
                         <div class="set-table-scroll">
-                        <table class="set-table" th:unless="${#lists.isEmpty(sets)}">
-                            <thead>
-                                <tr>
-                                    <th>SET</th>
-                                    <th>KG</th>
-                                    <th>REPS</th>
-                                    <th>MEMO</th>
-                                    <th th:if="${workoutLog.updatedAt == null}">관리</th>
+                        <table class="set-table" role="table" th:unless="${#lists.isEmpty(sets)}">
+                            <caption class="sr-only" th:text="${workoutExercise.exerciseName + ' 세트 기록'}"></caption>
+                            <thead role="rowgroup">
+                                <tr role="row">
+                                    <th scope="col" role="columnheader" class="record-col-set">SET</th>
+                                    <th scope="col" role="columnheader" class="record-col-weight">KG</th>
+                                    <th scope="col" role="columnheader" class="record-col-reps">REPS</th>
+                                    <th scope="col" role="columnheader" class="record-col-memo">MEMO</th>
+                                    <th scope="col" role="columnheader" class="record-col-action" th:if="${workoutLog.updatedAt == null}"><span class="sr-only">세트 삭제</span></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr th:each="workoutSet : ${sets}">
-                                    <td th:text="${workoutSet.setNo}"></td>
-                                    <td th:text="${workoutSet.weight != null ? workoutSet.weight : '-'}"></td>
-                                    <td th:text="${workoutSet.reps}"></td>
-                                    <td th:text="${workoutSet.memo}"></td>
-                                    <td th:if="${workoutLog.updatedAt == null}">
+                            <tbody role="rowgroup">
+                                <tr role="row" th:each="workoutSet : ${sets}">
+                                    <td role="cell" class="record-set-number" th:text="${workoutSet.setNo}"></td>
+                                    <td role="cell" class="record-set-value" th:text="${workoutSet.weight != null ? workoutSet.weight : '-'}"></td>
+                                    <td role="cell" class="record-set-value" th:text="${workoutSet.reps}"></td>
+                                    <td role="cell" class="record-set-memo" th:text="${workoutSet.memo}"></td>
+                                    <td role="cell" class="record-set-action" th:if="${workoutLog.updatedAt == null}">
                                         <form th:action="@{/workout/set/remove}" method="post"
                                               onsubmit="return confirm('이 세트 기록을 삭제하시겠습니까?');">
                                             <input type="hidden" name="workoutLogId"
@@ -77,7 +86,8 @@
                                                    th:value="${workoutExercise.workoutExerciseId}">
                                             <input type="hidden" name="workoutSetId"
                                                    th:value="${workoutSet.workoutSetId}">
-                                            <button class="btn btn-secondary btn-sm"
+                                            <button class="btn btn-secondary btn-sm record-set-remove"
+                                                    th:attr="aria-label=${workoutExercise.exerciseName + ' ' + workoutSet.setNo + '세트 삭제'}"
                                                     type="submit">삭제</button>
                                         </form>
                                     </td>
@@ -87,19 +97,24 @@
                         </div>
 
                         <form class="set-form" th:action="@{/workout/set/add}" method="post"
+                              th:attr="aria-label=${workoutExercise.exerciseName + ' 새 세트 입력'}"
                               th:if="${workoutLog.updatedAt == null}">
                             <input type="hidden" name="workoutLogId"
                                    th:value="${workoutLog.workoutLogId}">
                             <input type="hidden" name="workoutExerciseId"
                                    th:value="${workoutExercise.workoutExerciseId}">
+                            <div class="record-input-heading">
+                                <strong>새 세트 기록</strong>
+                                <span>중량은 선택, 횟수는 필수</span>
+                            </div>
                             <div class="form-group set-form-weight">
-                                <label class="form-label" th:for="${'weight-' + workoutExercise.workoutExerciseId}">KG</label>
+                                <label class="form-label" th:for="${'weight-' + workoutExercise.workoutExerciseId}">중량 <span>KG</span></label>
                                 <input class="form-control" type="number" name="weight"
                                        th:id="${'weight-' + workoutExercise.workoutExerciseId}" inputmode="decimal"
                                        min="0" max="9999.99" step="0.01" placeholder="0">
                             </div>
                             <div class="form-group set-form-reps">
-                                <label class="form-label" th:for="${'reps-' + workoutExercise.workoutExerciseId}">REPS</label>
+                                <label class="form-label" th:for="${'reps-' + workoutExercise.workoutExerciseId}">횟수 <span>REPS</span></label>
                                 <input class="form-control" type="number" name="reps"
                                        th:id="${'reps-' + workoutExercise.workoutExerciseId}" inputmode="numeric"
                                        min="1" max="999" required placeholder="0">
@@ -110,16 +125,20 @@
                                        th:id="${'memo-' + workoutExercise.workoutExerciseId}"
                                        maxlength="500" placeholder="선택">
                             </div>
-                            <button class="btn btn-primary" type="submit">+ 세트 추가</button>
+                            <button class="btn btn-secondary record-add-set" type="submit">+ 세트 추가</button>
                         </form>
                     </li>
                 </ol>
 
-                <p class="alert" th:if="${workoutLog.updatedAt != null}">
+                <p class="alert alert-success record-complete-notice" role="status" th:if="${workoutLog.updatedAt != null}">
                     완료된 운동 기록입니다.
                 </p>
 
-                <div class="completion-bar" th:if="${workoutLog.updatedAt == null}">
+                <div class="completion-bar record-completion" id="workoutComplete" th:if="${workoutLog.updatedAt == null}">
+                    <div>
+                        <h2>운동 기록 마무리</h2>
+                        <p>세트 기록을 확인한 뒤 운동을 완료하세요.</p>
+                    </div>
                     <form th:action="@{/workout/complete}" method="post"
                           onsubmit="return confirm('운동을 완료하시겠습니까?');">
                         <input type="hidden" name="workoutLogId"
@@ -127,7 +146,7 @@
                         <button class="btn btn-primary btn-wide" type="submit">운동 완료</button>
                     </form>
                 </div>
-                <p><a class="text-link" th:href="@{/workout/list}">← 운동 기록 목록으로 돌아가기</a></p>
+                <p class="record-back-link"><a class="text-link" th:href="@{/workout/list}">← 운동 기록 목록으로 돌아가기</a></p>
             </div>
         </main>
     </div>

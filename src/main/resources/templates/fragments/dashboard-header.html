@@ -7,7 +7,7 @@
             <nav class="dashboard-nav" aria-label="주요 메뉴">
                 <a th:classappend="${activePage == 'main'} ? ' is-current' : ''"
                    th:attr="aria-current=${activePage == 'main' ? 'page' : null}"
-                   th:href="@{/main}">오늘</a>
+                   th:href="@{/main}">홈</a>
                 <a th:classappend="${activePage == 'routines'} ? ' is-current' : ''"
                    th:attr="aria-current=${activePage == 'routines' ? 'page' : null}"
                    th:href="@{/routine/list}">루틴</a>
@@ -16,7 +16,7 @@
                    th:href="@{/workout/list}">기록</a>
                 <a th:classappend="${activePage == 'statistics'} ? ' is-current' : ''"
                    th:attr="aria-current=${activePage == 'statistics' ? 'page' : null}"
-                   th:href="@{/statistics}">통계</a>
+                   th:href="@{/statistics}">분석</a>
                 <a th:classappend="${activePage == 'bodyComposition'} ? ' is-current' : ''"
                    th:attr="aria-current=${activePage == 'bodyComposition' ? 'page' : null}"
                    th:href="@{/body-composition}">체성분</a>

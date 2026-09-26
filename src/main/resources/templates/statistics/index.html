@@ -3,161 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>운동 통계</title>
+    <title>운동 통계 · kosaFitLog!</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            background: var(--kf-bg-page);
-            color: var(--kf-text-primary);
-            font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+        .statistics-page { width: min(100%, 1248px); margin: 0 auto; padding: 24px 16px 64px; }
+        .statistics-page > *, .statistics-page section, .statistics-page aside { min-width: 0; }
+        .statistics-heading { margin-bottom: 18px; }
+        .statistics-page h1 { margin: 0; font-size: 24px; letter-spacing: -0.05em; line-height: 1.3; }
+        .statistics-page h2 { margin: 0; font-size: 22px; letter-spacing: -0.04em; line-height: 1.35; overflow-wrap: anywhere; }
+        .statistics-page h3 { margin: 0; font-size: 14px; }
+        .statistics-description { margin: 6px 0 0; color: var(--kf-text-secondary); font-size: 13px; }
+
+        /* The exercise name is also the native selector: one visible title, no duplicate heading. */
+        .statistics-growth { padding: 0; }
+        .statistics-controls { display: grid; grid-template-columns: minmax(0, 1fr) 124px; gap: 14px; align-items: end; padding: 0 0 16px; border-bottom: 1px solid var(--kf-border-default); }
+        .statistics-field { min-width: 0; }
+        .statistics-field label { display: block; margin-bottom: 3px; color: var(--kf-text-secondary); font-size: 12px; }
+        .statistics-field select, .body-part-period select { width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid var(--kf-border-default); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 16px; text-overflow: ellipsis; }
+        .statistics-page select:disabled { color: var(--kf-text-secondary); }
+        .statistics-exercise-picker { position: relative; display: flex; align-items: center; min-height: 44px; padding: 4px 28px 4px 0; }
+        .statistics-exercise-picker h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 750; letter-spacing: -0.055em; }
+        .statistics-exercise-picker::after { content: ''; position: absolute; right: 8px; top: calc(50% - 5px); width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+        .statistics-exercise-picker select { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .statistics-exercise-picker:focus-within { outline: 2px solid var(--kf-action-primary); outline-offset: 4px; border-radius: 4px; }
+        .statistics-exercise-picker option { color: var(--kf-text-primary); background: var(--kf-bg-surface); }
+
+        /* A single numeric strip, followed by the full-width plot. */
+        .statistics-summary { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; gap: 12px 18px; margin: 0; padding: 20px 0 16px; font-variant-numeric: tabular-nums; }
+        .statistics-summary dt { color: var(--kf-text-secondary); font-size: 12px; }
+        .statistics-summary dd { margin: 3px 0 0; overflow-wrap: anywhere; }
+        .statistics-summary .statistics-value { text-align: left; font-size: clamp(27px, 4vw, 40px); font-weight: 650; line-height: 1.15; letter-spacing: -0.045em; }
+        .statistics-summary-latest .statistics-value { color: var(--kf-action-primary); font-size: clamp(36px, 5vw, 52px); }
+        .statistics-summary .statistics-unit { font-size: 13px; letter-spacing: 0; white-space: nowrap; }
+        .statistics-summary-date { display: block; margin-top: 6px; color: var(--kf-text-secondary); font-size: 12px; }
+        .statistics-summary-days { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; }
+        .statistics-summary-days dd { margin: 0; font-size: 13px; font-weight: 600; }
+        .statistics-analysis, .statistics-plot { min-width: 0; }
+        .statistics-page .chart-panel { position: relative; width: 100%; min-width: 0; height: 340px; background: transparent; }
+        .statistics-page .chart-panel canvas { max-width: 100%; }
+        .statistics-note { margin: 10px 0 0; color: var(--kf-text-secondary); font-size: 12px; line-height: 1.7; }
+        .statistics-page .chart-message { margin: 12px 0; padding: 40px 16px; min-height: 180px; display: grid; place-items: center; color: var(--kf-text-secondary); border: 1px dashed var(--kf-border-default); text-align: center; }
+        .statistics-recent { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--kf-border-default); }
+        .statistics-recent-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .statistics-recent-heading a { display: inline-flex; align-items: center; min-height: 44px; color: var(--kf-text-secondary); font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+        .statistics-recent-list, .statistics-distribution-list { padding: 0; margin: 0; list-style: none; font-variant-numeric: tabular-nums; }
+        .statistics-recent-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+        .statistics-recent-list li { display: flex; flex-direction: column; gap: 5px; padding: 12px 0; border-bottom: 1px solid var(--kf-border-default); }
+        .statistics-recent-list time { color: var(--kf-text-secondary); font-size: 12px; }
+        .statistics-value { font-size: 21px; font-weight: 650; overflow-wrap: anywhere; }
+        .statistics-unit { margin-left: 4px; color: var(--kf-text-secondary); font-size: 12px; font-weight: 400; }
+        .statistics-empty-values { margin: 20px 0; color: var(--kf-text-secondary); font-size: 13px; }
+
+        /* Set counts lead; the bar chart is the visual comparison alongside them. */
+        .body-part-section { margin-top: 36px; padding-top: 24px; border-top: 2px solid var(--kf-text-primary); }
+        .body-part-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+        .body-part-header h2 { font-size: clamp(20px, 2.5vw, 26px); }
+        .body-part-period { display: flex; align-items: center; flex-shrink: 0; gap: 8px; font-size: 12px; }
+        .body-part-period select { width: 124px; font-size: 14px; }
+        .statistics-period-note { margin: 0 0 18px; color: var(--kf-text-secondary); font-size: 12px; }
+        .statistics-distribution { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; }
+        .statistics-distribution-values { min-width: 0; }
+        .statistics-distribution-values[hidden] + .statistics-plot { grid-column: 1 / -1; }
+        .statistics-distribution-key { margin: 0 0 4px; color: var(--kf-text-secondary); font-size: 12px; }
+        .statistics-distribution-list li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--kf-border-default); }
+        .statistics-distribution-list li > span:first-child { font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
+        .statistics-distribution-numbers { min-width: 0; text-align: right; }
+        .statistics-distribution-numbers .statistics-value { font-size: 30px; line-height: 1.2; letter-spacing: -0.04em; }
+        .statistics-volume { display: block; margin-top: 3px; color: var(--kf-text-secondary); font-size: 11px; font-weight: 400; }
+
+        .statistics-details { margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--kf-border-default); scroll-margin-top: 24px; }
+        .statistics-details-heading { margin-bottom: 18px; }
+        .statistics-details-heading h2 { font-size: 19px; }
+        .statistics-page .table-scroll { max-width: 100%; overflow-x: auto; }
+        .statistics-page .table-scroll:focus-visible { outline: 2px solid var(--kf-action-primary); outline-offset: 4px; }
+        .statistics-table { width: 100%; min-width: 900px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        .statistics-table th, .statistics-table td { padding: 14px 16px; border-bottom: 1px solid var(--kf-border-default); text-align: left; vertical-align: top; }
+        .statistics-table th { color: var(--kf-text-secondary); font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--kf-bg-surface); }
+        .statistics-table th small { display: block; font-size: 11px; font-weight: 400; }
+        .statistics-table td { font-size: 13px; }
+        .statistics-table td:first-child { white-space: nowrap; }
+        .statistics-table th:nth-child(n+4), .statistics-table td:nth-child(n+4) { text-align: right; }
+        .statistics-table td:empty::before { content: '-'; color: var(--kf-text-secondary); }
+        .statistics-table td[colspan] { padding: 32px 16px; text-align: center; color: var(--kf-text-secondary); }
+        .statistics-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; margin-top: 14px; }
+        .statistics-page-status { margin: 0; color: var(--kf-text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+        .statistics-pagination-controls, .statistics-page-numbers { display: flex; align-items: center; gap: 6px; }
+        .statistics-pagination button { min-width: 44px; min-height: 44px; padding: 8px; border: 1px solid var(--kf-border-default); border-radius: 6px; background: transparent; color: var(--kf-text-primary); font: inherit; font-size: 13px; cursor: pointer; }
+        .statistics-pagination button[aria-current="page"] { border-color: var(--kf-text-primary); background: var(--kf-text-primary); color: var(--kf-bg-surface); font-weight: 700; }
+        .statistics-pagination button:disabled { color: var(--kf-text-subtle); cursor: default; }
+        .statistics-pagination button:not(:disabled):hover { border-color: var(--kf-text-primary); }
+        @media (max-width: 359px) {
+            .statistics-controls { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+            .body-part-header { align-items: flex-start; flex-wrap: wrap; }
         }
-        .statistics-page {
-            width: min(100%, 1160px);
-            margin: 0 auto;
-            padding: 40px 24px 76px;
+        @media (max-width: 599px) {
+            .statistics-controls.has-long-exercise { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+            .statistics-controls.has-long-exercise .statistics-field:last-child { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+            .statistics-controls.has-long-exercise #metricSelect { width: 124px; }
         }
-        .statistics-back { display: inline-flex; min-height: 44px; align-items: center; margin-bottom: 12px; }
-        .statistics-page h1 { margin: 0; font-size: clamp(32px, 4vw, 44px); letter-spacing: -0.05em; }
-        .statistics-controls {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 240px));
-            gap: 16px;
-            margin: 18px 0 22px;
+        @media (min-width: 600px) {
+            .statistics-page { padding: 28px 24px 80px; }
+            .statistics-heading { margin-bottom: 20px; }
+            .statistics-controls { grid-template-columns: minmax(0, 1fr) 200px; gap: 32px; }
+            .statistics-summary { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .65fr); padding: 24px 0 20px; gap: 24px; }
+            .statistics-summary-days { display: block; grid-column: auto; }
+            .statistics-summary-days dd { margin-top: 5px; font-size: 24px; }
+            .statistics-page .chart-panel { height: 420px; }
+            .statistics-recent-list { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; }
+            .body-part-section { margin-top: 44px; }
         }
-        .statistics-field label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-        .statistics-field select {
-            width: 100%;
-            min-height: 44px;
-            padding: 8px 12px;
-            border: 1px solid var(--kf-border-default);
-            border-radius: var(--kf-radius-control);
-            background: var(--kf-bg-surface);
-            color: inherit;
-            font: inherit;
-        }
-        .chart-panel {
-            position: relative;
-            width: 100%;
-            height: 380px;
-            padding: 20px;
-            border: 1px solid var(--kf-border-default);
-            border-radius: var(--kf-radius-card);
-            background: var(--kf-bg-surface);
-        }
-        .body-part-section { margin-top: 36px; }
-        .body-part-header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .body-part-header h2 { margin: 0; }
-        .body-part-period { display: inline-flex; align-items: center; gap: 8px; }
-        .body-part-period select {
-            min-width: 140px;
-            min-height: 44px;
-            padding: 8px 12px;
-            border: 1px solid var(--kf-border-default);
-            border-radius: var(--kf-radius-control);
-            background: var(--kf-bg-surface);
-            color: inherit;
-            font: inherit;
-        }
-        .chart-message { margin: 20px 0; color: var(--kf-text-secondary); }
-        .table-scroll { max-width: 100%; overflow-x: auto; }
-        .statistics-table { width: 100%; min-width: 780px; border-collapse: collapse; background: var(--kf-bg-surface); }
-        .statistics-table th, .statistics-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--kf-border-default);
-            text-align: left;
-        }
-        .statistics-table th { color: var(--kf-text-secondary); font-size: 13px; }
-        @media (max-width: 600px) {
-            .statistics-page { padding: 22px 16px 56px; }
-            .statistics-controls { grid-template-columns: 1fr; }
-            .chart-panel { height: 280px; }
-            .body-part-period { width: 100%; }
-            .body-part-period select { flex: 1; min-width: 0; }
+        @media (min-width: 1000px) {
+            .statistics-page .chart-panel { height: 460px; }
+            .statistics-distribution { grid-template-columns: minmax(260px, .8fr) minmax(0, 1.5fr); gap: 56px; }
         }
     </style>
 </head>
 <body>
 <header th:replace="fragments/dashboard-header :: header('statistics')"></header>
 <main class="statistics-page">
-    <a class="text-link statistics-back" th:href="@{/main}">← 메인으로</a>
-    <h1>운동 통계</h1>
-
-    <div class="statistics-controls">
-        <div class="statistics-field">
-            <label for="exerciseSelect">운동 선택</label>
-            <select id="exerciseSelect"></select>
-        </div>
-        <div class="statistics-field">
-            <label for="metricSelect">지표 선택</label>
-            <select id="metricSelect">
-                <option value="totalVolume">총 볼륨</option>
-                <option value="maxWeight">최고 중량</option>
-                <option value="estimated1Rm">예상 1RM</option>
-                <option value="totalReps">총 반복수</option>
-                <option value="totalSets">총 세트수</option>
-            </select>
-        </div>
+    <div class="statistics-heading">
+        <h1>운동 통계</h1>
     </div>
 
-    <h2 id="chartTitle">운동별 변화</h2>
-    <div id="chartPanel" class="chart-panel" aria-labelledby="chartTitle">
-        <canvas id="volumeChart" role="img" aria-label="선택한 운동의 성장 추이"></canvas>
-    </div>
-    <p id="chartMessage" class="chart-message" role="status" hidden></p>
+    <section class="statistics-growth" aria-labelledby="chartTitle">
+        <div id="statisticsControls" class="statistics-controls">
+            <div class="statistics-field">
+                <label for="exerciseSelect">운동 선택</label>
+                <div class="statistics-exercise-picker">
+                    <h2 id="chartTitle">운동별 변화</h2>
+                    <select id="exerciseSelect"></select>
+                </div>
+            </div>
+            <div class="statistics-field">
+                <label for="metricSelect">지표 선택</label>
+                <select id="metricSelect">
+                    <option value="totalVolume">총 볼륨</option>
+                    <option value="maxWeight">최고 중량</option>
+                    <option value="estimated1Rm">예상 1RM</option>
+                    <option value="totalReps">총 반복수</option>
+                    <option value="totalSets">총 세트수</option>
+                </select>
+            </div>
+        </div>
+        <p class="sr-only" id="chartMetric">운동과 지표를 선택해 기록을 비교하세요.</p>
+        <dl id="metricSummary" class="statistics-summary" aria-label="선택 지표의 실제 기록 요약" hidden>
+            <div class="statistics-summary-latest">
+                <dt>최근 기록</dt>
+                <dd id="latestMetricValue">-</dd>
+                <dd><time id="latestMetricDate" class="statistics-summary-date"></time></dd>
+            </div>
+            <div>
+                <dt>기록 중 최고</dt>
+                <dd id="highestMetricValue">-</dd>
+            </div>
+            <div class="statistics-summary-days">
+                <dt>운동 기록일</dt>
+                <dd id="recordedDayCount">-</dd>
+            </div>
+        </dl>
+        <div class="statistics-analysis">
+            <div class="statistics-plot">
+                <div id="chartPanel" class="chart-panel" aria-labelledby="chartTitle">
+                    <canvas id="volumeChart" role="img" aria-label="선택한 운동의 성장 추이" aria-describedby="chartMetric chartNote"></canvas>
+                </div>
+                <p id="chartMessage" class="chart-message" role="status" hidden></p>
+                <p id="chartNote" class="statistics-note">선택한 운동의 전체 기록 · 값이 없는 지표는 -로 표시합니다.</p>
+                <p id="estimateNote" class="statistics-note" hidden>예상 1RM은 운동 기록으로 계산한 추정치이며, 실제 측정한 1RM이 아닙니다.</p>
+                <p id="singleRecordNote" class="statistics-note" hidden>표시할 값이 1개여서 점으로 표시합니다. 기록이 쌓이면 변화를 비교할 수 있습니다.</p>
+            </div>
+            <aside class="statistics-recent" aria-labelledby="recentValuesTitle">
+                <div class="statistics-recent-heading">
+                    <h3 id="recentValuesTitle">날짜별 기록 <span class="statistics-unit">최근 5건</span></h3>
+                    <a href="#statisticsDetails">전체 데이터 ↓</a>
+                </div>
+                <ul id="recentValues" class="statistics-recent-list" aria-label="선택한 운동과 지표의 최근 날짜별 수치"></ul>
+                <p id="recentValuesEmpty" class="statistics-empty-values" hidden>표시할 기록이 없습니다.</p>
+            </aside>
+        </div>
+    </section>
 
     <section class="body-part-section" aria-labelledby="bodyPartTitle">
         <div class="body-part-header">
             <h2 id="bodyPartTitle">부위별 훈련량</h2>
             <label class="body-part-period" for="bodyPartPeriod">
-                <span>기간</span>
-                <select id="bodyPartPeriod">
+                <span class="sr-only">부위별 기간</span>
+                <select id="bodyPartPeriod" aria-describedby="bodyPartPeriodNote">
                     <option value="7" selected>최근 7일</option>
                     <option value="30">최근 30일</option>
                     <option value="all">전체</option>
                 </select>
             </label>
         </div>
-        <div id="bodyPartChartPanel" class="chart-panel" aria-labelledby="bodyPartTitle">
-            <canvas id="bodyPartChartCanvas" role="img" aria-label="기간별 부위 훈련 세트 분포"></canvas>
+        <p id="bodyPartPeriodNote" class="statistics-period-note">기간 선택은 부위별 훈련량에만 적용됩니다.</p>
+        <div class="statistics-distribution">
+            <div id="bodyPartValuesPanel" class="statistics-distribution-values" hidden>
+                <p class="statistics-distribution-key">총 세트 수가 많은 순서</p>
+                <ul id="bodyPartValues" class="statistics-distribution-list" aria-label="부위별 세트 수와 보조 볼륨"></ul>
+                <p class="statistics-note">볼륨(kg)은 보조 수치입니다. 운동마다 사용 중량이 달라 부위 간 단순 비교에는 한계가 있습니다.</p>
+            </div>
+            <div class="statistics-plot">
+                <div id="bodyPartChartPanel" class="chart-panel" aria-labelledby="bodyPartTitle">
+                    <canvas id="bodyPartChartCanvas" role="img" aria-label="기간별 부위 훈련 세트 분포" aria-describedby="bodyPartPeriodNote"></canvas>
+                </div>
+                <p id="bodyPartChartMessage" class="chart-message" role="status" hidden></p>
+            </div>
         </div>
-        <p id="bodyPartChartMessage" class="chart-message" role="status" hidden></p>
     </section>
 
-    <h2>상세 데이터</h2>
-    <div class="table-scroll">
+    <section id="statisticsDetails" class="statistics-details" aria-labelledby="statisticsDetailsTitle">
+    <div class="statistics-details-heading">
+        <h2 id="statisticsDetailsTitle">상세 데이터</h2>
+        <p id="statisticsTableHelp" class="statistics-description">전체 운동 기록입니다. 좁은 화면에서는 표를 좌우로 이동해 확인하세요.</p>
+    </div>
+    <div class="table-scroll" role="region" aria-labelledby="statisticsDetailsTitle" aria-describedby="statisticsTableHelp" tabindex="0">
         <table class="statistics-table" aria-label="운동 통계 상세 데이터">
             <thead>
             <tr>
                 <th scope="col">운동 날짜</th>
                 <th scope="col">운동명</th>
                 <th scope="col">부위</th>
-                <th scope="col">총 볼륨</th>
-                <th scope="col">최고 중량</th>
-                <th scope="col">예상 1RM</th>
-                <th scope="col">총 반복수</th>
-                <th scope="col">총 세트수</th>
+                <th scope="col">총 볼륨 <small>kg</small></th>
+                <th scope="col">최고 중량 <small>kg</small></th>
+                <th scope="col">예상 1RM <small>kg · 추정치</small></th>
+                <th scope="col">총 반복수 <small>회</small></th>
+                <th scope="col">총 세트수 <small>세트</small></th>
             </tr>
             </thead>
 
-            <tbody>
+            <tbody id="statisticsTableBody">
             <tr th:if="${#lists.isEmpty(statisticsList)}">
                 <td colspan="8">아직 표시할 운동 통계가 없습니다.</td>
             </tr>
-            <tr th:each="stat : ${statisticsList}">
+            <tr th:each="stat : ${statisticsList}" data-statistics-row>
                 <td th:text="${stat.workoutDate}"></td>
                 <td th:text="${stat.exerciseName}"></td>
                 <td th:text="${stat.bodyPart}"></td>
@@ -172,12 +250,23 @@
             </tbody>
         </table>
     </div>
+    <nav id="statisticsPagination" class="statistics-pagination" aria-label="상세 데이터 페이지" hidden>
+        <p id="statisticsPageStatus" class="statistics-page-status" role="status"></p>
+        <div class="statistics-pagination-controls">
+            <button id="statisticsPreviousPage" type="button" aria-controls="statisticsTableBody">이전</button>
+            <div id="statisticsPageNumbers" class="statistics-page-numbers" aria-label="페이지 번호"></div>
+            <button id="statisticsNextPage" type="button" aria-controls="statisticsTableBody">다음</button>
+        </div>
+    </nav>
+    </section>
 
     <script th:inline="javascript">
         const statisticsList = /*[[${statisticsList}]]*/ [];
         const rows = Array.isArray(statisticsList) ? statisticsList : [];
         const chartColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--kf-action-primary').trim() || '#C84B30';
+        const chartTextColor = '#5F6963';
+        const chartGridColor = '#E9EAE5';
 
         // select의 value는 StatisticsDTO의 필드명과 같다.
         const metrics = {
@@ -190,11 +279,76 @@
 
         const exerciseSelect = document.getElementById('exerciseSelect');
         const metricSelect = document.getElementById('metricSelect');
+        const statisticsControls = document.getElementById('statisticsControls');
         const chartTitle = document.getElementById('chartTitle');
         const chartPanel = document.getElementById('chartPanel');
         const chartMessage = document.getElementById('chartMessage');
         const chartCanvas = document.getElementById('volumeChart');
+        const chartMetric = document.getElementById('chartMetric');
+        const recentValues = document.getElementById('recentValues');
+        const recentValuesEmpty = document.getElementById('recentValuesEmpty');
+        const estimateNote = document.getElementById('estimateNote');
+        const singleRecordNote = document.getElementById('singleRecordNote');
+        const metricSummary = document.getElementById('metricSummary');
+        const latestMetricValue = document.getElementById('latestMetricValue');
+        const latestMetricDate = document.getElementById('latestMetricDate');
+        const highestMetricValue = document.getElementById('highestMetricValue');
+        const recordedDayCount = document.getElementById('recordedDayCount');
         const exerciseNames = [...new Set(rows.map(stat => stat.exerciseName).filter(Boolean))];
+
+        // 표시용 형식만 바꾼다. 원본 값과 차트에 전달하는 NULL은 그대로 둔다.
+        function formatValue(value, isCountMetric) {
+            if (value == null || !Number.isFinite(Number(value))) return '-';
+            return Number(value).toLocaleString('ko-KR', {
+                maximumFractionDigits: isCountMetric ? 0 : 10
+            });
+        }
+
+        function createValue(value, unit, isCountMetric) {
+            const valueElement = document.createElement('span');
+            valueElement.className = 'statistics-value';
+            valueElement.textContent = formatValue(value, isCountMetric);
+            if (valueElement.textContent !== '-') {
+                const unitElement = document.createElement('span');
+                unitElement.className = 'statistics-unit';
+                unitElement.textContent = ' ' + unit;
+                valueElement.appendChild(unitElement);
+            }
+            return valueElement;
+        }
+
+        // 요약은 기존 차트 배열을 읽기만 한다. 최근 값이 NULL이면 이전 값으로 대체하지 않는다.
+        function showMetricSummary(exerciseRows, values, metric, isCountMetric) {
+            metricSummary.hidden = exerciseRows.length === 0;
+            if (exerciseRows.length === 0) return;
+
+            const lastIndex = exerciseRows.length - 1;
+            latestMetricValue.replaceChildren(createValue(values[lastIndex], metric.unit, isCountMetric));
+            latestMetricDate.dateTime = exerciseRows[lastIndex].workoutDate;
+            latestMetricDate.textContent = exerciseRows[lastIndex].workoutDate;
+
+            const recordedValues = values.filter(value => value !== null && Number.isFinite(value));
+            const highestValue = recordedValues.length === 0 ? null
+                : recordedValues.reduce((highest, value) => Math.max(highest, value));
+            highestMetricValue.replaceChildren(createValue(highestValue, metric.unit, isCountMetric));
+            const recordedDays = new Set(exerciseRows.map(stat => stat.workoutDate).filter(Boolean));
+            recordedDayCount.textContent = recordedDays.size.toLocaleString('ko-KR') + '일';
+        }
+
+        function showRecentValues(exerciseRows, metricName, metric, isCountMetric) {
+            recentValues.replaceChildren();
+            recentValuesEmpty.hidden = exerciseRows.length !== 0;
+            // 정렬된 원본 배열을 변경하지 않고 최근 5건만 최신순으로 표시한다.
+            exerciseRows.slice(-5).reverse().forEach(stat => {
+                const item = document.createElement('li');
+                const date = document.createElement('time');
+                date.dateTime = stat.workoutDate;
+                date.textContent = stat.workoutDate;
+                item.appendChild(date);
+                item.appendChild(createValue(stat[metricName], metric.unit, isCountMetric));
+                recentValues.appendChild(item);
+            });
+        }
 
         exerciseNames.forEach(name => {
             const option = document.createElement('option');
@@ -219,7 +373,15 @@
                 return value == null ? null : Number(value);
             });
 
-            chartTitle.textContent = exerciseName + ' - ' + metric.label;
+            chartTitle.textContent = exerciseName;
+            // 긴 운동명은 모바일에서 선택 영역 전체 폭을 사용한다.
+            statisticsControls.classList.toggle('has-long-exercise', exerciseName.length > 14);
+            chartMetric.textContent = metric.label + ' (' + metric.unit + ') · 전체 기록';
+            chartCanvas.setAttribute('aria-label', exerciseName + ' · ' + metric.label + ' 변화');
+            estimateNote.hidden = metricName !== 'estimated1Rm';
+            singleRecordNote.hidden = values.filter(value => value !== null).length !== 1;
+            showMetricSummary(exerciseRows, values, metric, isCountMetric);
+            showRecentValues(exerciseRows, metricName, metric, isCountMetric);
 
             // 같은 canvas에 Chart를 다시 만들기 전에 기존 인스턴스를 정리한다.
             if (chart != null) {
@@ -245,9 +407,13 @@
 
             chartPanel.hidden = false;
             chartMessage.hidden = true;
-            const yAxis = { title: { display: true, text: metric.label + ' (' + metric.unit + ')' } };
+            const yAxis = {
+                title: { display: false, text: metric.label + ' (' + metric.unit + ')', color: chartTextColor },
+                ticks: { color: chartTextColor },
+                grid: { color: chartGridColor }
+            };
             if (isCountMetric) {
-                yAxis.ticks = { precision: 0 };
+                yAxis.ticks.precision = 0;
             }
             chart = new Chart(chartCanvas, {
                 type: 'line',
@@ -259,6 +425,9 @@
                         borderColor: chartColor,
                         backgroundColor: chartColor,
                         borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        pointHitRadius: 12,
                         tension: 0.2,
                         spanGaps: false
                     }]
@@ -267,10 +436,17 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: chartTextColor, maxRotation: 0, maxTicksLimit: 5 }
+                        },
                         y: yAxis
                     },
                     plugins: {
+                        legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#1B2220',
+                            padding: 12,
                             callbacks: {
                                 label: context => {
                                     const value = isCountMetric
@@ -291,6 +467,7 @@
             chartPanel.hidden = true;
             chartMessage.textContent = '아직 운동 통계 데이터가 없습니다.';
             chartMessage.hidden = false;
+            recentValuesEmpty.hidden = false;
         } else {
             exerciseSelect.value = exerciseNames[0];
             metricSelect.value = 'totalVolume';
@@ -302,6 +479,9 @@
         const bodyPartPeriod = document.getElementById('bodyPartPeriod');
         const bodyPartChartPanel = document.getElementById('bodyPartChartPanel');
         const bodyPartChartMessage = document.getElementById('bodyPartChartMessage');
+        const bodyPartPeriodNote = document.getElementById('bodyPartPeriodNote');
+        const bodyPartValues = document.getElementById('bodyPartValues');
+        const bodyPartValuesPanel = document.getElementById('bodyPartValuesPanel');
         const latestWorkoutDate = rows.map(stat => stat.workoutDate).filter(Boolean).sort().pop();
         let bodyPartChart = null;
 
@@ -338,6 +518,29 @@
             const bodyPartSets = bodyPartLabels.map(bodyPart => bodyPartStats[bodyPart].totalSets);
             const bodyPartVolumes = bodyPartLabels.map(bodyPart => bodyPartStats[bodyPart].totalVolume);
 
+            bodyPartPeriodNote.textContent = (latestWorkoutDate
+                ? (bodyPartPeriod.value === 'all'
+                    ? '전체 기록 기준'
+                    : latestWorkoutDate + ' 기준 최근 ' + bodyPartPeriod.value + '일') + ' · '
+                : '') + '기간 선택은 부위별 훈련량에만 적용됩니다.';
+            bodyPartValues.replaceChildren();
+            bodyPartValuesPanel.hidden = bodyPartLabels.length === 0;
+            bodyPartLabels.forEach((bodyPart, index) => {
+                const item = document.createElement('li');
+                const name = document.createElement('span');
+                name.textContent = bodyPart;
+                const numbers = document.createElement('span');
+                numbers.className = 'statistics-distribution-numbers';
+                numbers.appendChild(createValue(bodyPartSets[index], '세트', true));
+                const volume = document.createElement('span');
+                volume.className = 'statistics-volume';
+                volume.textContent = '볼륨 ' + formatValue(bodyPartVolumes[index], false) + ' kg';
+                numbers.appendChild(volume);
+                item.appendChild(name);
+                item.appendChild(numbers);
+                bodyPartValues.appendChild(item);
+            });
+
             if (bodyPartChart != null) {
                 bodyPartChart.destroy();
                 bodyPartChart = null;
@@ -366,7 +569,9 @@
                     datasets: [{
                         label: '총 세트수',
                         data: bodyPartSets,
-                        backgroundColor: chartColor
+                        backgroundColor: chartColor,
+                        maxBarThickness: 24,
+                        borderRadius: 3
                     }]
                 },
                 options: {
@@ -377,13 +582,17 @@
                         x: {
                             beginAtZero: true,
                             suggestedMax: 30,
-                            ticks: { stepSize: 5, precision: 0 },
-                            title: { display: true, text: '총 세트수(세트)' }
+                            ticks: { stepSize: 5, precision: 0, color: chartTextColor },
+                            grid: { color: chartGridColor },
+                            title: { display: true, text: '총 세트수(세트)', color: chartTextColor }
                         },
-                        y: { ticks: { autoSkip: false } }
+                        y: { ticks: { autoSkip: false, color: chartTextColor }, grid: { display: false } }
                     },
                     plugins: {
+                        legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#1B2220',
+                            padding: 12,
                             callbacks: {
                                 label: context => [
                                     '총 세트수: ' + context.parsed.x.toFixed(0) + ' 세트',
@@ -397,6 +606,57 @@
         }
         drawBodyPartChart();
         bodyPartPeriod.addEventListener('change', drawBodyPartChart);
+
+        // statisticsList로 렌더링된 표 행만 10건씩 보여준다. 차트 데이터와 정렬은 변경하지 않는다.
+        const detailRows = Array.from(document.querySelectorAll('#statisticsTableBody [data-statistics-row]'));
+        const detailPageSize = 10;
+        const detailTotalPages = Math.max(1, Math.ceil(detailRows.length / detailPageSize));
+        const detailPagination = document.getElementById('statisticsPagination');
+        const detailPageStatus = document.getElementById('statisticsPageStatus');
+        const detailPreviousPage = document.getElementById('statisticsPreviousPage');
+        const detailNextPage = document.getElementById('statisticsNextPage');
+        const detailPageNumbers = document.getElementById('statisticsPageNumbers');
+        let detailCurrentPage = 1;
+
+        function showDetailPage() {
+            const start = (detailCurrentPage - 1) * detailPageSize;
+            const end = Math.min(start + detailPageSize, detailRows.length);
+            detailRows.forEach((row, index) => { row.hidden = index < start || index >= end; });
+            detailPagination.hidden = detailRows.length <= detailPageSize;
+            if (detailPagination.hidden) return;
+
+            detailPageStatus.textContent = detailCurrentPage + ' / ' + detailTotalPages + ' 페이지 · '
+                + (start + 1) + '–' + end + ' / ' + detailRows.length + '건';
+            detailPreviousPage.disabled = detailCurrentPage === 1;
+            detailNextPage.disabled = detailCurrentPage === detailTotalPages;
+            detailPageNumbers.replaceChildren();
+
+            // 모바일에서도 한 줄에 들어가도록 현재 페이지 주변 번호를 최대 3개 표시한다.
+            const firstPage = Math.max(1, Math.min(detailCurrentPage - 1, detailTotalPages - 2));
+            const lastPage = Math.min(detailTotalPages, firstPage + 2);
+            for (let page = firstPage; page <= lastPage; page++) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = page;
+                button.setAttribute('aria-label', page + '페이지');
+                button.setAttribute('aria-controls', 'statisticsTableBody');
+                if (page === detailCurrentPage) button.setAttribute('aria-current', 'page');
+                button.addEventListener('click', () => {
+                    detailCurrentPage = page;
+                    showDetailPage();
+                    detailPageNumbers.querySelector('[aria-current="page"]').focus();
+                });
+                detailPageNumbers.appendChild(button);
+            }
+        }
+
+        detailPreviousPage.addEventListener('click', () => {
+            if (detailCurrentPage > 1) { detailCurrentPage--; showDetailPage(); }
+        });
+        detailNextPage.addEventListener('click', () => {
+            if (detailCurrentPage < detailTotalPages) { detailCurrentPage++; showDetailPage(); }
+        });
+        showDetailPage();
     </script>
 </main>
 </body>

@@ -1832,3 +1832,215 @@ a {
 @media (max-width: 375px) {
     .landing-title { font-size: 27px; }
 }
+
+/* Workout Record: page-scoped, mobile-first input workspace. */
+.workout-record-page .record-main { margin-left: 0; padding: 28px 16px 52px; }
+.workout-record-page .content-shell { max-width: 1000px; }
+.workout-record-page .record-page-header { align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+.record-eyebrow { margin: 0 0 6px; color: var(--kf-action-primary-hover); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; }
+.workout-record-page .page-title { font-size: clamp(30px, 4vw, 40px); }
+.workout-record-page .summary-meta { flex-wrap: wrap; gap: 10px 14px; }
+.workout-record-page .date-text { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.record-exercise-count { color: var(--kf-text-secondary); font-size: 13px; }
+.record-exercise-count strong { color: var(--kf-text-primary); margin-right: 3px; }
+.record-complete-jump { display: inline-flex; min-height: 44px; align-items: center; color: var(--kf-text-secondary); font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+.workout-record-page .alert { overflow-wrap: anywhere; }
+.workout-record-page .exercise-stack { gap: 24px; counter-reset: record-exercise; }
+.workout-record-page .exercise-card { min-width: 0; margin: 0; padding: 20px 16px; border: 1px solid var(--kf-border-default); border-top: 3px solid var(--kf-nav-default); border-radius: 8px; counter-increment: record-exercise; }
+.workout-record-page .exercise-card-header { display: block; margin-bottom: 20px; }
+.record-exercise-marker { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; color: var(--kf-text-secondary); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; }
+.record-exercise-marker::before { content: counter(record-exercise, decimal-leading-zero); color: var(--kf-action-primary-hover); font-size: 15px; letter-spacing: 0; }
+.workout-record-page .exercise-card-title { display: block; margin: 0; font-size: clamp(25px, 3.5vw, 30px); line-height: 1.3; letter-spacing: -0.045em; overflow-wrap: anywhere; }
+.record-body-part { margin-top: 9px; border-radius: 4px; }
+.record-body-part:empty { display: none; }
+.workout-record-page .exercise-memo { margin: 10px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+.workout-record-page .set-empty { margin: 0; padding: 16px 0; border-radius: 0; border-top: 1px solid var(--kf-border-default); background: transparent; font-size: 14px; }
+
+/* Existing sets stay read-only; memo moves below the numeric row on mobile. */
+.workout-record-page .set-table-scroll { overflow: visible; }
+.workout-record-page .set-table { display: block; width: 100%; min-width: 0; table-layout: fixed; }
+.workout-record-page .set-table thead,
+.workout-record-page .set-table tbody { display: block; }
+.workout-record-page .set-table tr { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1fr) 48px; align-items: center; gap: 0 8px; }
+.workout-record-page.record-readonly .set-table tr { grid-template-columns: 32px repeat(2, minmax(0, 1fr)); }
+.workout-record-page .set-table th,
+.workout-record-page .set-table td { min-width: 0; padding: 10px 0; border: 0; overflow-wrap: anywhere; }
+.workout-record-page .set-table thead tr { border-bottom: 1px solid var(--kf-border-default); }
+.workout-record-page .set-table th { font-size: 11px; }
+.workout-record-page .set-table tbody tr { min-height: 56px; border-bottom: 1px solid var(--kf-border-default); }
+.workout-record-page .set-table tbody tr:last-child { border-bottom: 0; }
+.workout-record-page .record-col-weight,
+.workout-record-page .record-col-reps,
+.workout-record-page .record-set-value { text-align: center; }
+.workout-record-page .record-set-number { color: var(--kf-text-secondary); font-size: 13px; font-weight: 600; }
+.workout-record-page .record-set-value { font-size: 22px; font-weight: 700; letter-spacing: -0.025em; }
+.workout-record-page .record-col-memo { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.workout-record-page .record-set-memo { grid-column: 1 / -1; grid-row: 2; padding: 0 0 12px 40px; color: var(--kf-text-secondary); font-size: 13px; white-space: pre-wrap; }
+.workout-record-page .record-set-memo:empty { display: none; }
+.workout-record-page .record-set-memo:not(:empty)::before { content: "메모 · "; color: var(--kf-text-secondary); font-size: 11px; }
+.workout-record-page .record-set-action { grid-column: 4; grid-row: 1; padding: 0; }
+.record-set-action form { margin: 0; }
+.workout-record-page .record-set-remove { width: 48px; min-height: 44px; padding: 0 4px; border-color: transparent; border-radius: 5px; background: transparent; color: var(--kf-text-secondary); font-size: 12px; font-weight: 500; }
+.workout-record-page .record-set-remove:hover { color: var(--kf-danger); border-color: #E8C6C6; background: #FCF1F1; }
+
+.workout-record-page .set-form { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px 12px; margin-top: 20px; padding: 20px 0 0; border-top: 1px solid var(--kf-border-default); border-radius: 0; background: transparent; }
+.record-input-heading { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; }
+.record-input-heading strong { font-size: 14px; }
+.record-input-heading > span { color: var(--kf-text-secondary); font-size: 11px; }
+.workout-record-page .set-form .form-group { min-width: 0; }
+.workout-record-page .set-form .form-label { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
+.workout-record-page .set-form .form-label span { color: var(--kf-text-secondary); font-size: 11px; font-weight: 500; }
+.workout-record-page .set-form .form-control { width: 100%; min-width: 0; min-height: 64px; padding: 10px 12px; border-color: var(--kf-text-subtle); border-radius: 6px; color: var(--kf-text-primary); font-size: clamp(24px, 5vw, 26px); font-weight: 700; font-variant-numeric: tabular-nums; }
+.workout-record-page .set-form .form-control:focus { border-color: var(--kf-action-primary); }
+.workout-record-page .set-form-memo { grid-column: 1 / -1; }
+.workout-record-page .set-form-memo .form-control { min-height: 46px; font-size: 16px; font-weight: 400; }
+.workout-record-page .record-add-set { grid-column: 1 / -1; width: 100%; min-height: 48px; border-color: var(--kf-text-subtle); border-radius: 6px; color: var(--kf-text-primary); background: var(--kf-bg-page); }
+.workout-record-page .record-add-set:hover { border-color: var(--kf-nav-default); background: #EAE8E1; }
+
+.workout-record-page .record-completion { flex-direction: column; align-items: stretch; justify-content: space-between; gap: 20px; margin-top: 28px; padding: 24px 20px; border-radius: 8px; color: #FFFFFF; background: var(--kf-nav-default); scroll-margin-top: 20px; }
+.record-completion h2 { margin: 0; font-size: 22px; letter-spacing: -0.04em; }
+.record-completion p { margin: 6px 0 0; color: #C2CBC3; font-size: 13px; }
+.record-completion form { margin: 0; }
+.record-completion .btn { width: 100%; min-height: 52px; }
+.record-complete-notice { margin-top: 24px; }
+.record-back-link { margin: 16px 0 0; }
+.record-back-link a { display: inline-flex; min-height: 44px; align-items: center; font-size: 13px; }
+
+@media (max-width: 1100px) {
+    .workout-record-page .dashboard-header-inner { min-height: 0; padding-top: 8px; }
+    .workout-record-page .dashboard-brand,
+    .workout-record-page .dashboard-nav { min-height: 44px; }
+}
+
+@media (min-width: 768px) {
+    .workout-record-page .record-main { padding: 40px 32px 72px; }
+    .workout-record-page .record-page-header { align-items: flex-end; }
+    .workout-record-page .exercise-card { padding: 26px 28px; }
+    .workout-record-page .set-table { display: table; }
+    .workout-record-page .set-table thead { display: table-header-group; }
+    .workout-record-page .set-table tbody { display: table-row-group; }
+    .workout-record-page .set-table tr { display: table-row; }
+    .workout-record-page .set-table th,
+    .workout-record-page .set-table td { display: table-cell; padding: 12px 8px; border-bottom: 1px solid var(--kf-border-default); }
+    .workout-record-page .record-col-set { width: 8%; }
+    .workout-record-page .record-col-weight,
+    .workout-record-page .record-col-reps { width: 18%; }
+    .workout-record-page .record-col-action { width: 64px; }
+    .workout-record-page .record-col-memo { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
+    .workout-record-page .record-set-memo:empty { display: table-cell; }
+    .workout-record-page .record-set-memo:not(:empty)::before { content: none; }
+    .workout-record-page .record-set-action { text-align: right; }
+    .workout-record-page .record-completion { flex-direction: row; align-items: center; padding: 28px; }
+}
+
+@media (min-width: 1024px) {
+    .workout-record-page .set-form { grid-template-columns: 140px 140px minmax(140px, 1fr) 160px; }
+    .workout-record-page .set-form-memo,
+    .workout-record-page .record-add-set { grid-column: auto; }
+    .workout-record-page .set-form-memo .form-control,
+    .workout-record-page .record-add-set { min-height: 64px; }
+}
+
+/* Routine: choose a plan, review its exercises, then start a workout. */
+.routine-page .main-content { margin-left: 0; min-height: 0; padding: 28px 16px 64px; }
+.routine-page .content-shell { max-width: 1200px; min-width: 0; }
+.routine-page .content-shell.narrow { max-width: 760px; }
+.routine-page .page-header { gap: 18px; margin-bottom: 28px; padding: 0; border: 0; }
+.routine-page .page-header > div { min-width: 0; }
+.routine-page .page-title { font-size: clamp(30px, 4vw, 42px); overflow-wrap: anywhere; }
+.routine-page .page-description { font-size: 14px; overflow-wrap: anywhere; }
+.routine-page .page-actions { flex-shrink: 0; }
+.routine-read-page .page-actions .btn { width: auto; }
+.routine-page .routine-start-jump { display: inline-flex; min-height: 44px; align-items: center; margin-left: auto; color: var(--kf-action-primary-hover); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.routine-page .btn { min-height: 48px; border-radius: 6px; font-size: 14px; }
+.routine-page .btn-secondary { background: transparent; }
+.routine-page .btn-secondary:hover { background: #EAE8E1; }
+.routine-page :where(a, button, input, textarea):focus-visible { outline: 2px solid var(--kf-action-primary); outline-offset: 3px; }
+.routine-page form { margin: 0; }
+.routine-page .alert { overflow-wrap: anywhere; }
+.routine-page .date-text { font-size: 12px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.routine-page .badge { min-height: 24px; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.routine-page .badge:empty { display: none; }
+.routine-page .empty-state { padding: 40px 20px; border: 1px dashed var(--kf-border-default); border-radius: 6px; background: transparent; }
+.routine-page .empty-state-title { font-size: 20px; }
+.routine-page .empty-state-text { font-size: 14px; }
+.routine-page .empty-state .btn { margin-top: 20px; }
+
+/* A broad, scannable list rather than equal-size card tiles. */
+.routine-page .routine-grid { grid-template-columns: minmax(0, 1fr); gap: 0; border-top: 2px solid var(--kf-nav-default); }
+.routine-page .routine-card { display: grid; min-height: 0; gap: 16px; padding: 24px 0; border: 0; border-bottom: 1px solid var(--kf-border-default); border-radius: 0; background: transparent; }
+.routine-page .routine-card-content { min-width: 0; }
+.routine-page .routine-card-title { font-size: clamp(25px, 3vw, 32px); line-height: 1.3; letter-spacing: -0.045em; overflow-wrap: anywhere; }
+.routine-page .routine-card-description { display: block; margin: 8px 0 12px; overflow: visible; -webkit-line-clamp: unset; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.routine-page .routine-card-description:empty { display: none; }
+.routine-page .routine-created { margin: 12px 0 0; color: var(--kf-text-secondary); font-size: 11px; }
+.routine-page .routine-card-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; margin: 0; padding: 0; border: 0; }
+.routine-page .routine-card-footer .routine-start-button { width: 100%; min-height: 50px; }
+.routine-page .routine-secondary-link { display: inline-flex; min-height: 44px; align-items: center; color: var(--kf-text-secondary); font-size: 13px; font-weight: 500; }
+.routine-page .routine-secondary-link:hover { color: var(--kf-text-primary); text-decoration: underline; text-underline-offset: 4px; }
+
+/* Exercise order stays in the server-provided list order. */
+.routine-page .routine-back-link { display: inline-flex; min-height: 44px; align-items: center; margin-bottom: 12px; color: var(--kf-text-secondary); font-size: 13px; font-weight: 500; }
+.routine-page .summary-description { margin-top: 12px; font-size: 15px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.routine-page .summary-description:empty { display: none; }
+.routine-page .summary-meta { margin-top: 16px; gap: 10px 16px; }
+.routine-page .routine-detail-layout { display: grid; gap: 28px; align-items: start; }
+.routine-page .routine-composition { min-width: 0; border: 0; border-top: 2px solid var(--kf-nav-default); border-radius: 0; background: transparent; }
+.routine-page .card-header { gap: 12px; padding: 18px 0; }
+.routine-page .card-title { font-size: 20px; }
+.routine-page .routine-exercise-count { margin-left: 4px; color: var(--kf-text-secondary); font-size: 16px; font-weight: 500; }
+.routine-page .exercise-list { padding: 0; }
+.routine-page .list-row { grid-template-columns: 30px minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 24px 0; }
+.routine-page .list-row-index { padding-top: 2px; font-variant-numeric: tabular-nums; }
+.routine-page .list-row-index::before { content: counter(routine-exercise, decimal-leading-zero); color: var(--kf-action-primary-hover); font-size: 17px; font-weight: 600; }
+.routine-page .exercise-info-action { min-width: 0; }
+.routine-page .exercise-name { margin-bottom: 8px; font-size: 22px; line-height: 1.35; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.routine-page .exercise-memo { margin: 12px 0 0; font-size: 13px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.routine-page .exercise-memo:empty { display: none; }
+.routine-page .exercise-info-action .exercise-memo::before { content: '메모 · '; color: var(--kf-text-secondary); font-size: 11px; }
+.routine-page .exercise-info-link { display: flex; width: fit-content; min-height: 44px; align-items: center; margin-top: 4px; color: var(--kf-text-secondary); font-size: 13px; font-weight: 500; }
+.routine-page .exercise-info-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.routine-page .routine-remove { min-width: 48px; min-height: 44px; padding: 0 10px; border-color: var(--kf-border-default); background: transparent; color: #9B3535; font-size: 12px; font-weight: 500; }
+.routine-page .routine-remove:hover { border-color: var(--kf-danger); background: #FCF1F1; }
+.routine-page .routine-start-panel { display: grid; gap: 20px; margin: 0; padding: 26px 20px; border-radius: 8px; color: #FFFFFF; background: var(--kf-nav-default); scroll-margin-top: 24px; }
+.routine-page .routine-eyebrow { margin: 0 0 10px; color: #D5DDD6; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; }
+.routine-page .routine-start-panel h2 { margin: 0; font-size: 24px; line-height: 1.3; letter-spacing: -0.045em; }
+.routine-page .routine-start-description { margin: 12px 0 0; color: #C2CBC3; font-size: 13px; line-height: 1.8; }
+.routine-page .routine-start-panel .btn { width: 100%; min-width: 0; min-height: 54px; padding: 10px 12px; white-space: normal; line-height: 1.5; }
+.routine-page .routine-management { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--kf-border-default); color: var(--kf-text-secondary); font-size: 12px; }
+
+/* Catalog entries pair each exercise with its own optional memo and POST form. */
+.routine-page .exercise-catalog { gap: 0; border-top: 2px solid var(--kf-nav-default); }
+.routine-page .exercise-catalog-row { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 24px 0; border: 0; border-bottom: 1px solid var(--kf-border-default); border-radius: 0; background: transparent; }
+.routine-page .routine-catalog-copy { min-width: 0; }
+.routine-page .exercise-add-form { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; min-width: 0; }
+.routine-page .routine-memo-label { grid-column: 1 / -1; color: var(--kf-text-secondary); font-size: 12px; }
+.routine-page .routine-memo-label span { margin-left: 4px; font-size: 11px; }
+.routine-page .exercise-add-form .form-control { min-width: 0; height: 50px; border-radius: 6px; font-size: 16px; }
+.routine-page .exercise-add-form .btn { min-width: 64px; }
+.routine-page .form-control::placeholder, .routine-page .form-textarea::placeholder { color: var(--kf-text-secondary); }
+
+.routine-page .form-card { padding: 24px 0 0; border: 0; border-top: 2px solid var(--kf-nav-default); border-radius: 0; background: transparent; }
+.routine-page .form-grid { gap: 24px; }
+.routine-page .form-card .form-control { height: 56px; font-size: 18px; }
+.routine-page .form-card .form-textarea { min-height: 176px; font-size: 16px; }
+.routine-page .routine-field-note { margin-left: 6px; color: var(--kf-text-secondary); font-size: 12px; font-weight: 400; }
+.routine-page .form-actions { flex-direction: row; }
+.routine-page .form-actions .btn { flex: 1; min-height: 50px; }
+
+@media (min-width: 700px) {
+    .routine-page .main-content { padding: 36px 32px 80px; }
+    .routine-page .page-header { align-items: center; }
+    .routine-page .routine-card { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; padding: 30px 0; }
+    .routine-page .routine-card-footer { grid-template-columns: 160px; justify-items: stretch; gap: 4px; text-align: center; }
+    .routine-page .routine-secondary-link { justify-content: center; }
+    .routine-page .list-row { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 16px; }
+    .routine-page .form-actions .btn { flex: none; min-width: 140px; width: auto; }
+    .routine-page .exercise-catalog-row { grid-template-columns: minmax(0, 1fr) minmax(260px, 0.7fr); align-items: center; gap: 32px; padding: 28px 0; }
+}
+
+@media (min-width: 1050px) {
+    .routine-page .routine-start-jump { display: none; }
+    .routine-page .routine-detail-layout { grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; }
+    .routine-page .routine-start-panel { position: sticky; top: 24px; padding: 28px 24px; }
+}

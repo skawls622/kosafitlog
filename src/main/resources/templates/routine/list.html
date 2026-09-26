@@ -6,38 +6,48 @@
     <title>kosaFitLog 루틴 목록</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
+<body class="routine-page routine-list-page">
     <div class="app-layout">
-        <aside th:replace="fragments/sidebar :: sidebar('routines')"></aside>
+        <header th:replace="fragments/dashboard-header :: header('routines')"></header>
 
         <main class="main-content">
             <div class="content-shell">
                 <header class="page-header">
                     <div>
                         <h1 class="page-title">내 루틴</h1>
-                        <p class="page-description">자주 하는 운동 구성을 루틴으로 저장하고 빠르게 시작하세요.</p>
+                        <p class="page-description">오늘 어떤 루틴으로 운동할까요? 구성을 확인하거나 바로 시작하세요.</p>
                     </div>
                     <div class="page-actions">
-                        <a class="btn btn-primary" th:href="@{/routine/register}">+ 새 루틴</a>
+                        <a class="btn btn-secondary" th:href="@{/routine/register}">+ 새 루틴</a>
                     </div>
                 </header>
 
-                <p class="alert" th:if="${param.notFound}">루틴을 찾을 수 없습니다.</p>
+                <p class="alert" role="alert" th:if="${param.notFound}">루틴을 찾을 수 없습니다.</p>
 
                 <section class="card empty-state" th:if="${#lists.isEmpty(routines)}">
                     <h2 class="empty-state-title">아직 등록된 루틴이 없습니다</h2>
-                    <p class="empty-state-text">새 루틴을 만들어 첫 운동 계획을 등록해보세요.</p>
+                    <p class="empty-state-text">운동을 시작하려면 먼저 나만의 루틴을 만들어보세요.</p>
+                    <a class="btn btn-primary" th:href="@{/routine/register}">루틴 만들기</a>
                 </section>
 
                 <section class="routine-grid" th:unless="${#lists.isEmpty(routines)}">
                     <article class="routine-card" th:each="routine : ${routines}">
-                        <h2 class="routine-card-title" th:text="${routine.routineName}"></h2>
-                        <p class="routine-card-description" th:text="${routine.description}"></p>
+                        <div class="routine-card-content">
+                            <h2 class="routine-card-title" th:text="${routine.routineName}"></h2>
+                            <p class="routine-card-description" th:text="${routine.description}"></p>
+                            <p class="routine-created">등록일 <span class="date-text" th:text="${routine.createdAt}"></span></p>
+                        </div>
                         <div class="routine-card-footer">
-                            <span class="date-text" th:text="${routine.createdAt}"></span>
-                            <a class="text-link"
+                            <form th:action="@{/workout/start}" method="post"
+                                  onsubmit="return confirm('이 루틴으로 운동을 시작하시겠습니까?');">
+                                <input type="hidden" name="routineId" th:value="${routine.routineId}">
+                                <button class="btn btn-primary routine-start-button" type="submit"
+                                        th:attr="aria-label=${routine.routineName + ' 운동 시작'}">운동 시작</button>
+                            </form>
+                            <a class="text-link routine-secondary-link"
+                               th:attr="aria-label=${routine.routineName + ' 상세보기'}"
                                th:href="@{/routine/read(routineId=${routine.routineId})}">
-                                상세보기 →
+                                구성 · 상세보기 →
                             </a>
                         </div>
                     </article>

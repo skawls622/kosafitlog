@@ -5,66 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 루틴 상세</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
-    <style>
-        .exercise-info-action { min-width: 0; }
-        .exercise-info-action .exercise-name { overflow-wrap: anywhere; }
-        .exercise-info-link {
-            display: flex;
-            width: fit-content;
-            min-height: 44px;
-            align-items: center;
-            margin-top: 4px;
-            padding-right: 8px;
-            color: var(--kf-action-primary);
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .exercise-info-link:hover { text-decoration: underline; }
-        .exercise-info-link:focus-visible {
-            outline: 2px solid currentColor;
-            outline-offset: 2px;
-        }
-    </style>
 </head>
-<body>
+<body class="routine-page routine-read-page">
     <div class="app-layout">
-        <aside th:replace="fragments/sidebar :: sidebar('routines')"></aside>
+        <header th:replace="fragments/dashboard-header :: header('routines')"></header>
 
         <main class="main-content">
             <div class="content-shell">
+                <a class="text-link routine-back-link" th:href="@{/routine/list}">← 루틴 목록으로 돌아가기</a>
                 <header class="page-header">
                     <div>
                         <h1 class="page-title" th:text="${routine.routineName}"></h1>
-                        <p class="page-description">루틴 상세 · 운동 구성을 확인하고 바로 운동을 시작하세요.</p>
+                        <p class="summary-description" th:text="${routine.description}"></p>
+                        <div class="summary-meta">
+                            <span class="badge badge-primary">나의 루틴</span>
+                            <span class="date-text">등록일 <span th:text="${routine.createdAt}"></span></span>
+                        </div>
                     </div>
                     <div class="page-actions">
                         <a class="btn btn-secondary"
                            th:href="@{/routine/modify(routineId=${routine.routineId})}">수정</a>
-                        <form th:action="@{/routine/remove}" method="post"
-                              onsubmit="return confirm('루틴이 삭제됩니다. 삭제하시겠습니까?');">
-                            <input type="hidden" name="routineId" th:value="${routine.routineId}">
-                            <button class="btn btn-danger" type="submit">루틴 삭제</button>
-                        </form>
+                        <a class="routine-start-jump" href="#routineStart">운동 시작으로 ↓</a>
                     </div>
                 </header>
 
-                <p class="alert" th:if="${startError}" th:text="${startError}"></p>
+                <p class="alert" role="alert" th:if="${startError}" th:text="${startError}"></p>
 
-                <section class="card summary-card">
-                    <h2 class="summary-title" th:text="${routine.routineName}"></h2>
-                    <p class="summary-description" th:text="${routine.description}"></p>
-                    <div class="summary-meta">
-                        <span class="badge badge-primary">나의 루틴</span>
-                        <span class="date-text">
-                            등록일 <span th:text="${routine.createdAt}"></span>
-                        </span>
-                    </div>
-                </section>
-
-                <section class="card">
+                <div class="routine-detail-layout">
+                <section class="card routine-composition" aria-labelledby="routineExercisesTitle">
                     <div class="card-header">
-                        <h2 class="card-title">구성 운동</h2>
+                        <h2 id="routineExercisesTitle" class="card-title">구성 운동 <span class="routine-exercise-count" th:text="${#lists.size(routineExercises)}"></span></h2>
                         <a class="btn btn-secondary"
                            th:href="@{/routine/exercise/add(routineId=${routine.routineId})}">
                             + 운동 추가
@@ -84,24 +54,30 @@
                                         th:text="${routineExercise.exerciseName}"></strong>
                                 <span class="badge badge-muted"
                                       th:text="${routineExercise.bodyPart}"></span>
+                                <p class="exercise-memo" th:if="${routineExercise.memo}"
+                                   th:text="${routineExercise.memo}"></p>
                                 <a class="exercise-info-link"
                                    th:href="@{/exercise/info(exerciseId=${routineExercise.exerciseId})}">운동 정보 →</a>
                             </div>
-                            <span class="exercise-memo" th:if="${routineExercise.memo}"
-                                  th:text="${routineExercise.memo}"></span>
                             <form th:action="@{/routine/exercise/remove}" method="post"
                                   onsubmit="return confirm('루틴에서 이 운동을 제거하시겠습니까?');">
                                 <input type="hidden" name="routineId"
                                        th:value="${routine.routineId}">
                                 <input type="hidden" name="routineExerciseId"
                                        th:value="${routineExercise.routineExerciseId}">
-                                <button class="btn btn-secondary btn-sm" type="submit">제거</button>
+                                <button class="btn btn-secondary btn-sm routine-remove" type="submit"
+                                        th:attr="aria-label=${routineExercise.exerciseName + ' 루틴에서 제거'}">제거</button>
                             </form>
                         </li>
                     </ol>
                 </section>
 
-                <div class="completion-bar">
+                <aside id="routineStart" class="completion-bar routine-start-panel" aria-labelledby="routineStartTitle">
+                    <div>
+                        <p class="routine-eyebrow">READY TO TRAIN</p>
+                        <h2 id="routineStartTitle">오늘의 운동 시작</h2>
+                        <p class="routine-start-description">구성을 확인했다면, 운동을 시작하고 세트별 중량과 횟수를 기록하세요.</p>
+                    </div>
                     <form th:action="@{/workout/start}" method="post"
                           onsubmit="return confirm('이 루틴으로 운동을 시작하시겠습니까?');">
                         <input type="hidden" name="routineId" th:value="${routine.routineId}">
@@ -109,8 +85,17 @@
                             이 루틴으로 운동 시작
                         </button>
                     </form>
+                </aside>
                 </div>
-                <p><a class="text-link" th:href="@{/routine/list}">← 루틴 목록으로 돌아가기</a></p>
+
+                <footer class="routine-management">
+                    <span>루틴 관리</span>
+                    <form th:action="@{/routine/remove}" method="post"
+                          onsubmit="return confirm('루틴이 삭제됩니다. 삭제하시겠습니까?');">
+                        <input type="hidden" name="routineId" th:value="${routine.routineId}">
+                        <button class="btn btn-danger routine-remove" type="submit">루틴 삭제</button>
+                    </form>
+                </footer>
             </div>
         </main>
     </div>
