@@ -5,10 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kosaFitLog 운동 추가</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .routine-exercise-add-page .exercise-choice { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; min-height: 44px; cursor: pointer; }
+        .routine-exercise-add-page .exercise-selector { width: 24px; height: 24px; margin: 3px 0 0; accent-color: var(--kf-action-primary); cursor: pointer; }
+        .routine-exercise-add-page .exercise-choice .exercise-name { margin: 0 0 8px; }
+        .routine-exercise-add-page .exercise-selection-order { margin-left: 6px; }
+        .routine-exercise-add-page .is-selected { border-bottom-color: var(--kf-action-primary); }
+        .routine-exercise-add-page .routine-added .exercise-choice { cursor: default; color: var(--kf-text-secondary); }
+        .routine-exercise-add-page .exercise-selector:disabled { cursor: default; }
+        .routine-exercise-add-page .exercise-add-form { grid-template-columns: minmax(0, 1fr); }
+        .routine-exercise-add-page .exercise-add-form input:disabled { background: #EAE8E1; }
+        .routine-exercise-add-page .routine-selection-help { color: var(--kf-text-secondary); font-size: 13px; }
+        .routine-exercise-add-page .routine-bulk-actions { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px 20px; padding: 16px 0; border-top: 1px solid var(--kf-border-default); background: var(--kf-bg-page); }
+        .routine-exercise-add-page .routine-bulk-actions p { margin: 0; color: var(--kf-text-secondary); font-size: 13px; }
+        .routine-exercise-add-page .routine-bulk-actions button:disabled { opacity: 0.55; cursor: not-allowed; }
+        @media (max-width: 640px) {
+            .routine-exercise-add-page .routine-bulk-actions .btn { width: 100%; }
+        }
+    </style>
 </head>
-<body>
+<body class="routine-page routine-exercise-add-page">
     <div class="app-layout">
-        <aside th:replace="fragments/sidebar :: sidebar('routines')"></aside>
+        <header th:replace="fragments/dashboard-header :: header('routines')"></header>
         <main class="main-content">
             <div class="content-shell">
                 <header class="page-header">
@@ -26,34 +44,111 @@
                     </div>
                 </header>
 
-                <p class="alert" th:if="${exerciseError}" th:text="${exerciseError}"></p>
+                <p class="alert" role="alert" th:if="${exerciseError}" th:text="${exerciseError}"></p>
 
                 <p class="empty-state" th:if="${#lists.isEmpty(exercises)}">추가할 운동이 없습니다.</p>
 
-                <section class="exercise-catalog">
-                    <article class="exercise-catalog-row" th:each="exercise : ${exercises}">
-                        <div>
-                            <span class="badge badge-muted" th:text="${exercise.bodyPart}"></span>
-                            <strong class="exercise-name"
-                                    th:text="${exercise.exerciseName}"></strong>
+                <form id="routineExerciseAdd" th:action="@{/routine/exercise/add}" method="post"
+                      th:unless="${#lists.isEmpty(exercises)}" aria-describedby="exerciseSelectionHelp">
+                    <input type="hidden" name="routineId" th:value="${routine.routineId}">
+                    <p id="exerciseSelectionHelp" class="routine-selection-help">여러 운동을 선택하세요. 선택한 순서대로 추가되며, 운동별 메모는 선택 사항입니다.</p>
+                    <div id="orderedExerciseIds"></div>
+                    <section class="exercise-catalog" aria-label="추가할 운동 선택">
+                    <article class="exercise-catalog-row" th:each="exercise : ${exercises}"
+                             th:classappend="${addedExerciseIds.contains(exercise.exerciseId)} ? ' routine-added' : ''">
+                        <div class="routine-catalog-copy">
+                            <label class="exercise-choice" th:for="${'exercise-select-' + exercise.exerciseId}">
+                                <input class="exercise-selector" type="checkbox" name="exerciseIds"
+                                       th:id="${'exercise-select-' + exercise.exerciseId}"
+                                       th:value="${exercise.exerciseId}"
+                                       th:disabled="${addedExerciseIds.contains(exercise.exerciseId)}">
+                                <span>
+                                    <strong class="exercise-name" th:text="${exercise.exerciseName}"></strong>
+                                    <span class="badge badge-muted" th:text="${exercise.bodyPart}"></span>
+                                    <span class="badge badge-muted" th:if="${addedExerciseIds.contains(exercise.exerciseId)}">추가됨</span>
+                                    <span class="badge badge-primary exercise-selection-order" data-selection-order hidden></span>
+                                </span>
+                            </label>
+                            <p class="exercise-memo" th:text="${exercise.description}"></p>
                         </div>
-                        <p class="exercise-memo" th:text="${exercise.description}"></p>
-                        <form class="exercise-add-form"
-                              th:action="@{/routine/exercise/add}" method="post">
-                            <input type="hidden" name="routineId"
-                                   th:value="${routine.routineId}">
-                            <input type="hidden" name="exerciseId"
-                                   th:value="${exercise.exerciseId}">
-                            <label class="sr-only" th:for="${'exercise-memo-' + exercise.exerciseId}">운동 메모</label>
-                            <input class="form-control" type="text" name="memo"
+                        <div class="exercise-add-form" th:unless="${addedExerciseIds.contains(exercise.exerciseId)}">
+                            <label class="routine-memo-label" th:for="${'exercise-memo-' + exercise.exerciseId}">운동 메모 <span>선택</span></label>
+                            <input class="form-control" type="text" th:name="${'memos[' + exercise.exerciseId + ']'}"
                                    th:id="${'exercise-memo-' + exercise.exerciseId}"
                                    maxlength="500" placeholder="메모 (선택)">
-                            <button class="btn btn-primary" type="submit">추가</button>
-                        </form>
+                        </div>
                     </article>
-                </section>
+                    </section>
+                    <div class="routine-bulk-actions">
+                        <p id="exerciseSelectionSummary" role="status" aria-live="polite">추가할 운동을 선택해 주세요.</p>
+                        <button id="addSelectedExercises" class="btn btn-primary" type="submit" disabled>선택한 운동 추가</button>
+                    </div>
+                    <noscript><p class="alert">여러 운동을 선택하려면 브라우저에서 JavaScript를 활성화해 주세요.</p></noscript>
+                </form>
             </div>
         </main>
     </div>
+    <script>
+        (() => {
+            const form = document.getElementById('routineExerciseAdd');
+            if (!form) return;
+            const checkboxes = Array.from(form.querySelectorAll('.exercise-selector'));
+            const orderedInputs = document.getElementById('orderedExerciseIds');
+            const summary = document.getElementById('exerciseSelectionSummary');
+            const submitButton = document.getElementById('addSelectedExercises');
+            let selectedIds = [];
+
+            // 체크박스의 기본 전송 순서는 화면 순서다. 클릭한 순서의 hidden input으로 전송한다.
+            checkboxes.forEach(checkbox => checkbox.removeAttribute('name'));
+
+            function updateSelection() {
+                const checkedIds = checkboxes.filter(checkbox => checkbox.checked && !checkbox.disabled)
+                    .map(checkbox => checkbox.value);
+                selectedIds = selectedIds.filter(id => checkedIds.includes(id));
+                checkedIds.forEach(id => { if (!selectedIds.includes(id)) selectedIds.push(id); });
+
+                orderedInputs.textContent = '';
+                selectedIds.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'exerciseIds';
+                    input.value = id;
+                    orderedInputs.appendChild(input);
+                });
+
+                checkboxes.forEach(checkbox => {
+                    const row = checkbox.closest('.exercise-catalog-row');
+                    const index = selectedIds.indexOf(checkbox.value);
+                    const selected = index !== -1;
+                    row.classList.toggle('is-selected', selected);
+                    const order = row.querySelector('[data-selection-order]');
+                    order.hidden = !selected;
+                    order.textContent = selected ? '선택 ' + (index + 1) : '';
+                    const memo = row.querySelector('input[type="text"]');
+                    if (memo) memo.disabled = !selected;
+                });
+                submitButton.disabled = selectedIds.length === 0;
+                summary.textContent = selectedIds.length > 0
+                    ? selectedIds.length + '개 운동 선택 · 선택한 순서대로 추가됩니다.'
+                    : checkboxes.every(checkbox => checkbox.disabled)
+                        ? '모든 운동이 이미 루틴에 추가되어 있습니다.'
+                        : '추가할 운동을 선택해 주세요.';
+            }
+
+            checkboxes.forEach(checkbox => checkbox.addEventListener('change', updateSelection));
+            form.addEventListener('submit', event => {
+                updateSelection();
+                if (selectedIds.length === 0) {
+                    event.preventDefault();
+                    const firstAvailable = checkboxes.find(checkbox => !checkbox.disabled);
+                    if (firstAvailable) firstAvailable.focus();
+                    return;
+                }
+                submitButton.disabled = true;
+            });
+            window.addEventListener('pageshow', updateSelection);
+            updateSelection();
+        })();
+    </script>
 </body>
 </html>

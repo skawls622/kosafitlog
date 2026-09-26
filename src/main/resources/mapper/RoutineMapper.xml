@@ -31,6 +31,15 @@
           AND member_id = #{memberId}
     </select>
 
+    <!-- 같은 루틴에 대한 동시 추가 요청을 트랜잭션 종료까지 순서대로 처리한다. -->
+    <select id="lockOwnedRoutine" resultType="long">
+        SELECT routine_id
+        FROM routines
+        WHERE routine_id = #{routineId}
+          AND member_id = #{memberId}
+        FOR UPDATE
+    </select>
+
     <update id="updateRoutine" parameterType="com.kosa.fitlog.routine.dto.RoutineDTO">
         UPDATE routines
         SET routine_name = #{routineName},

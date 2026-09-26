@@ -18,6 +18,10 @@ public interface RoutineMapper {
             @Param("routineId") Long routineId,
             @Param("memberId") Long memberId);
 
+    Long lockOwnedRoutine(
+            @Param("routineId") Long routineId,
+            @Param("memberId") Long memberId);
+
     int updateRoutine(RoutineDTO routine);
 
     int deleteRoutine(

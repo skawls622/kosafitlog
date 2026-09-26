@@ -11,8 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.kosa.fitlog.member.dto.LoginMember;
 import com.kosa.fitlog.routine.dto.RoutineDTO;
+import com.kosa.fitlog.routine.dto.RoutineExerciseDTO;
 import com.kosa.fitlog.routine.service.RoutineService;
 import com.kosa.fitlog.routine.service.RoutineExerciseService;
 
@@ -205,6 +210,9 @@ class RoutineControllerTests {
         routine.setRoutineId(7L);
         when(routineService.getRoutine(7L, 10L)).thenReturn(routine);
         when(routineExerciseService.getAllExercises()).thenReturn(Collections.emptyList());
+        RoutineExerciseDTO existing = new RoutineExerciseDTO();
+        existing.setExerciseId(3L);
+        when(routineExerciseService.getRoutineExercises(7L)).thenReturn(Collections.singletonList(existing));
 
         mockMvc.perform(get("/routine/exercise/add")
                 .session(loginSession)
@@ -212,7 +220,8 @@ class RoutineControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(view().name("routine/exercise-add"))
                 .andExpect(model().attribute("routine", routine))
-                .andExpect(model().attributeExists("exercises"));
+                .andExpect(model().attributeExists("exercises"))
+                .andExpect(model().attribute("addedExerciseIds", Set.of(3L)));
     }
 
     @Test
@@ -230,18 +239,69 @@ class RoutineControllerTests {
 
     @Test
     void addExerciseUsesSessionMemberId() throws Exception {
-        when(routineExerciseService.add(10L, 7L, 3L, "가볍게")).thenReturn(true);
+        when(routineExerciseService.add(10L, 7L, Collections.singletonList(3L), Map.of(3L, "가볍게"))).thenReturn(true);
 
         mockMvc.perform(post("/routine/exercise/add")
                 .session(loginSession)
                 .param("memberId", "999")
                 .param("routineId", "7")
-                .param("exerciseId", "3")
-                .param("memo", "가볍게"))
+                .param("exerciseIds", "3")
+                .param("memos[3]", "가볍게"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/routine/read?routineId=7"));
 
-        verify(routineExerciseService).add(10L, 7L, 3L, "가볍게");
+        verify(routineExerciseService).add(10L, 7L, Collections.singletonList(3L), Map.of(3L, "가볍게"));
+    }
+
+    @Test
+    void multipleSelectionKeepsOrderAndIgnoresUnselectedMemo() throws Exception {
+        when(routineExerciseService.add(10L, 7L, Arrays.asList(3L, 2L),
+                Map.of(3L, "첫 번째", 2L, "두 번째"))).thenReturn(true);
+        mockMvc.perform(post("/routine/exercise/add").session(loginSession)
+                .param("memberId", "999").param("routineId", "7")
+                .param("exerciseIds", "3", "2")
+                .param("memos[3]", "첫 번째").param("memos[2]", "두 번째")
+                .param("memos[99]", "선택하지 않은 운동"))
+                .andExpect(redirectedUrl("/routine/read?routineId=7"));
+        verify(routineExerciseService).add(10L, 7L, Arrays.asList(3L, 2L),
+                Map.of(3L, "첫 번째", 2L, "두 번째"));
+    }
+
+    @Test
+    void emptySelectionReturnsToSelectionWithMessage() throws Exception {
+        when(routineExerciseService.add(10L, 7L, null, Collections.emptyMap()))
+                .thenThrow(new IllegalArgumentException("추가할 운동을 하나 이상 선택해 주세요."));
+        mockMvc.perform(post("/routine/exercise/add").session(loginSession).param("routineId", "7"))
+                .andExpect(redirectedUrl("/routine/exercise/add?routineId=7"))
+                .andExpect(flash().attribute("exerciseError", "추가할 운동을 하나 이상 선택해 주세요."));
+    }
+
+    @Test
+    void duplicateSelectionReturnsToFreshSelectionPage() throws Exception {
+        when(routineExerciseService.add(10L, 7L, Arrays.asList(3L, 2L), Map.of(3L, "", 2L, "")))
+                .thenThrow(new IllegalArgumentException("이미 추가된 운동이 있습니다."));
+        mockMvc.perform(post("/routine/exercise/add").session(loginSession).param("routineId", "7")
+                .param("exerciseIds", "3", "2").param("memos[3]", "").param("memos[2]", ""))
+                .andExpect(redirectedUrl("/routine/exercise/add?routineId=7"))
+                .andExpect(flash().attribute("exerciseError", "이미 추가된 운동이 있습니다."));
+    }
+
+    @Test
+    void multipleAdditionStillRejectsAnotherMembersRoutine() throws Exception {
+        when(routineExerciseService.add(10L, 99L, Arrays.asList(3L, 2L), Map.of(3L, "", 2L, ""))).thenReturn(false);
+        mockMvc.perform(post("/routine/exercise/add").session(loginSession).param("routineId", "99")
+                .param("exerciseIds", "3", "2").param("memos[3]", "").param("memos[2]", ""))
+                .andExpect(redirectedUrl("/routine/list?notFound"));
+    }
+
+    @Test
+    void failedBatchReturnsToSelectionWithGenericMessage() throws Exception {
+        when(routineExerciseService.add(10L, 7L, Collections.singletonList(3L), Map.of(3L, "")))
+                .thenThrow(new IllegalStateException("insert failed"));
+        mockMvc.perform(post("/routine/exercise/add").session(loginSession).param("routineId", "7")
+                .param("exerciseIds", "3").param("memos[3]", ""))
+                .andExpect(redirectedUrl("/routine/exercise/add?routineId=7"))
+                .andExpect(flash().attribute("exerciseError", "운동 추가에 실패했습니다. 다시 시도해 주세요."));
     }
 
     @Test
@@ -311,7 +371,7 @@ class RoutineControllerTests {
                 .andReturn();
         MvcResult exerciseAdd = mockMvc.perform(post("/routine/exercise/add")
                 .param("routineId", "1")
-                .param("exerciseId", "1"))
+                .param("exerciseIds", "1", "2"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/member/login"))
                 .andReturn();

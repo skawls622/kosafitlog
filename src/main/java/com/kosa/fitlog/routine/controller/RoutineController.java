@@ -1,9 +1,16 @@
 package com.kosa.fitlog.routine.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.dao.DataAccessException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.kosa.fitlog.member.dto.LoginMember;
 import com.kosa.fitlog.routine.dto.RoutineDTO;
+import com.kosa.fitlog.routine.dto.RoutineExerciseDTO;
 import com.kosa.fitlog.routine.service.RoutineService;
 import com.kosa.fitlog.routine.service.RoutineExerciseService;
 
@@ -154,14 +162,18 @@ public class RoutineController {
 
         model.addAttribute("routine", routine);
         model.addAttribute("exercises", routineExerciseService.getAllExercises());
+        Set<Long> addedExerciseIds = routineExerciseService.getRoutineExercises(routineId).stream()
+                .map(RoutineExerciseDTO::getExerciseId)
+                .collect(Collectors.toSet());
+        model.addAttribute("addedExerciseIds", addedExerciseIds);
         return "routine/exercise-add";
     }
 
     @PostMapping("/exercise/add")
     public String addExercise(
             @RequestParam("routineId") Long routineId,
-            @RequestParam("exerciseId") Long exerciseId,
-            @RequestParam(value = "memo", required = false) String memo,
+            @RequestParam(value = "exerciseIds", required = false) List<Long> exerciseIds,
+            @RequestParam Map<String, String> formValues,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
         LoginMember loginMember = getLoginMember(request);
@@ -169,15 +181,25 @@ public class RoutineController {
             return "redirect:/member/login";
         }
 
+        Map<Long, String> memos = new HashMap<>();
+        if (exerciseIds != null) {
+            for (Long exerciseId : exerciseIds) {
+                memos.put(exerciseId, formValues.get("memos[" + exerciseId + "]"));
+            }
+        }
+
         try {
             boolean added = routineExerciseService.add(
-                    loginMember.getMemberId(), routineId, exerciseId, memo);
+                    loginMember.getMemberId(), routineId, exerciseIds, memos);
             if (!added) {
                 return "redirect:/routine/list?notFound";
             }
             return "redirect:/routine/read?routineId=" + routineId;
         } catch (IllegalArgumentException exception) {
             redirectAttributes.addFlashAttribute("exerciseError", exception.getMessage());
+            return "redirect:/routine/exercise/add?routineId=" + routineId;
+        } catch (DataAccessException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("exerciseError", "운동 추가에 실패했습니다. 다시 시도해 주세요.");
             return "redirect:/routine/exercise/add?routineId=" + routineId;
         }
     }

@@ -1,13 +1,16 @@
 package com.kosa.fitlog.routine.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,17 +47,15 @@ class RoutineExerciseServiceTests {
     }
 
     @Test
-    void exerciseOrderUsesOneTwoThreeFromMapper() {
-        RoutineDTO routine = new RoutineDTO();
+    void multipleExercisesKeepSelectionOrderAndTheirOwnMemos() {
         ExerciseDTO exercise = new ExerciseDTO();
-        when(routineMapper.findByRoutineIdAndMemberId(7L, 10L)).thenReturn(routine);
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
         when(exerciseMapper.findById(any())).thenReturn(exercise);
-        when(routineExerciseMapper.findNextExerciseOrder(7L)).thenReturn(1, 2, 3);
+        when(routineExerciseMapper.findNextExerciseOrder(7L)).thenReturn(5);
         when(routineExerciseMapper.insertRoutineExercise(any())).thenReturn(1);
 
-        service().add(10L, 7L, 1L, null);
-        service().add(10L, 7L, 2L, null);
-        service().add(10L, 7L, 3L, null);
+        assertThat(service().add(10L, 7L, Arrays.asList(3L, 1L, 2L),
+                Map.of(3L, "  첫 운동 메모  ", 1L, "   ", 2L, "마지막 운동 메모"))).isTrue();
 
         ArgumentCaptor<RoutineExerciseDTO> captor =
                 ArgumentCaptor.forClass(RoutineExerciseDTO.class);
@@ -62,25 +63,93 @@ class RoutineExerciseServiceTests {
                 org.mockito.Mockito.times(3)).insertRoutineExercise(captor.capture());
         assertThat(captor.getAllValues())
                 .extracting(RoutineExerciseDTO::getExerciseOrder)
-                .containsExactly(1, 2, 3);
+                .containsExactly(5, 6, 7);
+        assertThat(captor.getAllValues()).extracting(RoutineExerciseDTO::getExerciseId)
+                .containsExactly(3L, 1L, 2L);
+        assertThat(captor.getAllValues()).extracting(RoutineExerciseDTO::getMemo)
+                .containsExactly("첫 운동 메모", null, "마지막 운동 메모");
+        verify(routineExerciseMapper).findNextExerciseOrder(7L);
     }
 
     @Test
     void anotherMembersRoutineCannotReceiveExercise() {
-        when(routineMapper.findByRoutineIdAndMemberId(99L, 10L)).thenReturn(null);
+        when(routineMapper.lockOwnedRoutine(99L, 10L)).thenReturn(null);
 
-        assertThat(service().add(10L, 99L, 1L, null)).isFalse();
+        assertThat(service().add(10L, 99L, Arrays.asList(1L, 2L), Collections.emptyMap())).isFalse();
         verify(exerciseMapper, never()).findById(any());
+        verify(routineExerciseMapper, never()).findByRoutineId(any());
         verify(routineExerciseMapper, never()).insertRoutineExercise(any());
     }
 
     @Test
     void missingMasterExerciseCannotBeAdded() {
-        when(routineMapper.findByRoutineIdAndMemberId(7L, 10L))
-                .thenReturn(new RoutineDTO());
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        when(exerciseMapper.findById(1L)).thenReturn(new ExerciseDTO());
         when(exerciseMapper.findById(999L)).thenReturn(null);
 
-        assertThat(service().add(10L, 7L, 999L, null)).isFalse();
+        assertThatThrownBy(() -> service().add(10L, 7L, Arrays.asList(1L, 999L), null))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(routineExerciseMapper, never()).insertRoutineExercise(any());
+    }
+
+    @Test
+    void oneSelectedExerciseStillWorks() {
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        when(exerciseMapper.findById(1L)).thenReturn(new ExerciseDTO());
+        when(routineExerciseMapper.findNextExerciseOrder(7L)).thenReturn(1);
+        when(routineExerciseMapper.insertRoutineExercise(any())).thenReturn(1);
+        assertThat(service().add(10L, 7L, Collections.singletonList(1L), null)).isTrue();
+        ArgumentCaptor<RoutineExerciseDTO> captor = ArgumentCaptor.forClass(RoutineExerciseDTO.class);
+        verify(routineExerciseMapper).insertRoutineExercise(captor.capture());
+        assertThat(captor.getValue().getExerciseOrder()).isEqualTo(1);
+        assertThat(captor.getValue().getMemo()).isNull();
+    }
+
+    @Test
+    void emptyAndMissingSelectionsAreRejected() {
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        assertThatThrownBy(() -> service().add(10L, 7L, null, null))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("하나 이상");
+        assertThatThrownBy(() -> service().add(10L, 7L, Collections.emptyList(), null))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(routineExerciseMapper, never()).insertRoutineExercise(any());
+    }
+
+    @Test
+    void existingExerciseRejectsWholeSelectionBeforeAnyInsert() {
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        RoutineExerciseDTO existing = new RoutineExerciseDTO();
+        existing.setExerciseId(2L);
+        when(routineExerciseMapper.findByRoutineId(7L)).thenReturn(Collections.singletonList(existing));
+        when(exerciseMapper.findById(any())).thenReturn(new ExerciseDTO());
+        assertThatThrownBy(() -> service().add(10L, 7L, Arrays.asList(1L, 2L), null))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("이미 추가된");
+        verify(routineExerciseMapper, never()).insertRoutineExercise(any());
+    }
+
+    @Test
+    void repeatedRequestIdsAreRejectedBeforeAnyInsert() {
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        when(exerciseMapper.findById(1L)).thenReturn(new ExerciseDTO());
+        assertThatThrownBy(() -> service().add(10L, 7L, Arrays.asList(1L, 1L), null))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("중복");
+        verify(routineExerciseMapper, never()).insertRoutineExercise(any());
+    }
+
+    @Test
+    void invalidSecondMemoCannotLeaveFirstExerciseInserted() {
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        when(exerciseMapper.findById(any())).thenReturn(new ExerciseDTO());
+        assertThatThrownBy(() -> service().add(10L, 7L, Arrays.asList(1L, 2L), Map.of(2L, "a".repeat(501))))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("500자");
+        verify(routineExerciseMapper, never()).insertRoutineExercise(any());
+    }
+
+    @Test
+    void nullExerciseIdIsRejected() {
+        when(routineMapper.lockOwnedRoutine(7L, 10L)).thenReturn(7L);
+        assertThatThrownBy(() -> service().add(10L, 7L, Collections.singletonList(null), null))
+                .isInstanceOf(IllegalArgumentException.class);
         verify(routineExerciseMapper, never()).insertRoutineExercise(any());
     }
 
