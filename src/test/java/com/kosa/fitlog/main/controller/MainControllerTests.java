@@ -120,7 +120,7 @@ class MainControllerTests {
 
         mockMvc.perform(post("/member/logout").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/member/login"));
+                .andExpect(redirectedUrl("/main"));
 
         mockMvc.perform(get("/main"))
                 .andExpect(status().isOk())

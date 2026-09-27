@@ -130,6 +130,14 @@
             overflow-wrap: anywhere;
         }
 
+        .exercise-info__instruction + .exercise-info__instruction { margin-top: 22px; }
+        .exercise-info__instruction-title {
+            margin: 0 0 8px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .exercise-info__instruction .exercise-info__section-text { line-height: 1.8; }
+
         .exercise-info__source {
             margin: 24px 0 0;
             color: var(--info-muted);
@@ -166,35 +174,41 @@
         </header>
 
         <div th:if="${apiExercise != null}">
-            <dl class="exercise-info__facts">
-                <div>
+            <dl class="exercise-info__facts"
+                th:if="${!#strings.isEmpty(displayDifficulty) or !#strings.isEmpty(displayType) or !#strings.isEmpty(displayMuscle)}">
+                <div th:if="${!#strings.isEmpty(displayDifficulty)}">
                     <dt class="exercise-info__fact-label">난이도</dt>
-                    <dd class="exercise-info__fact-value" th:text="${apiExercise.difficulty}"></dd>
+                    <dd class="exercise-info__fact-value" th:text="${displayDifficulty}"></dd>
                 </div>
-                <div>
+                <div th:if="${!#strings.isEmpty(displayType)}">
                     <dt class="exercise-info__fact-label">운동 유형</dt>
-                    <dd class="exercise-info__fact-value" th:text="${apiExercise.type}"></dd>
+                    <dd class="exercise-info__fact-value" th:text="${displayType}"></dd>
                 </div>
-                <div>
+                <div th:if="${!#strings.isEmpty(displayMuscle)}">
                     <dt class="exercise-info__fact-label">자극 부위</dt>
-                    <dd class="exercise-info__fact-value" th:text="${apiExercise.muscle}"></dd>
+                    <dd class="exercise-info__fact-value" th:text="${displayMuscle}"></dd>
                 </div>
             </dl>
 
-            <section class="exercise-info__section">
+            <section class="exercise-info__section" th:if="${!#strings.isEmpty(displayEquipments)}">
                 <h2 class="exercise-info__section-title">필요 장비</h2>
-                <p class="exercise-info__section-text" th:text="${apiExercise.equipments}"></p>
-            </section>
-
-            <section class="exercise-info__section">
-                <h2 class="exercise-info__section-title">운동 방법</h2>
-                <p class="exercise-info__section-text" th:text="${apiExercise.instructions}"></p>
+                <p class="exercise-info__section-text" th:text="${displayEquipments}"></p>
             </section>
 
             <section class="exercise-info__section"
-                     th:if="${apiExercise.safetyInfo != null and !#strings.isEmpty(apiExercise.safetyInfo)}">
+                     th:if="${!#lists.isEmpty(instructionSections)}">
+                <h2 class="exercise-info__section-title">운동 방법</h2>
+                <div class="exercise-info__instruction" th:each="section : ${instructionSections}">
+                    <h3 class="exercise-info__instruction-title" th:if="${section.title != null}"
+                        th:text="${section.title}"></h3>
+                    <p class="exercise-info__section-text" th:text="${section.text}"></p>
+                </div>
+            </section>
+
+            <section class="exercise-info__section"
+                     th:if="${translatedSafetyInfo != null and !#strings.isEmpty(#strings.trim(translatedSafetyInfo))}">
                 <h2 class="exercise-info__section-title">안전 가이드</h2>
-                <p class="exercise-info__section-text" th:text="${apiExercise.safetyInfo}"></p>
+                <p class="exercise-info__section-text" th:text="${translatedSafetyInfo}"></p>
             </section>
 
             <p class="exercise-info__source">

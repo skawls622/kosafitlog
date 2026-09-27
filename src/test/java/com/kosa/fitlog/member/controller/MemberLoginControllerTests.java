@@ -114,7 +114,7 @@ class MemberLoginControllerTests {
 
         mockMvc.perform(post("/member/logout").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/member/login"));
+                .andExpect(redirectedUrl("/main"));
 
         assertThat(session.isInvalid()).isTrue();
         mockMvc.perform(get("/member/login-success"))
