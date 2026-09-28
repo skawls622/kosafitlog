@@ -26,7 +26,7 @@
         .statistics-exercise-picker h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 750; letter-spacing: -0.055em; }
         .statistics-exercise-picker::after { content: ''; position: absolute; right: 8px; top: calc(50% - 5px); width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
         .statistics-exercise-picker select { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-        .statistics-exercise-picker:focus-within { outline: 2px solid var(--kf-action-primary); outline-offset: 4px; border-radius: 4px; }
+        .statistics-exercise-picker:focus-within { outline: 2px solid var(--kf-text-primary); outline-offset: 4px; border-radius: 4px; }
         .statistics-exercise-picker option { color: var(--kf-text-primary); background: var(--kf-bg-surface); }
 
         /* A single numeric strip, followed by the full-width plot. */
@@ -34,7 +34,7 @@
         .statistics-summary dt { color: var(--kf-text-secondary); font-size: 12px; }
         .statistics-summary dd { margin: 3px 0 0; overflow-wrap: anywhere; }
         .statistics-summary .statistics-value { text-align: left; font-size: clamp(27px, 4vw, 40px); font-weight: 650; line-height: 1.15; letter-spacing: -0.045em; }
-        .statistics-summary-latest .statistics-value { color: var(--kf-action-primary); font-size: clamp(36px, 5vw, 52px); }
+        .statistics-summary-latest .statistics-value { color: var(--kf-text-primary); font-size: clamp(36px, 5vw, 52px); }
         .statistics-summary .statistics-unit { font-size: 13px; letter-spacing: 0; white-space: nowrap; }
         .statistics-summary-date { display: block; margin-top: 6px; color: var(--kf-text-secondary); font-size: 12px; }
         .statistics-summary-days { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; }
@@ -76,7 +76,7 @@
         .statistics-details-heading { margin-bottom: 18px; }
         .statistics-details-heading h2 { font-size: 19px; }
         .statistics-page .table-scroll { max-width: 100%; overflow-x: auto; }
-        .statistics-page .table-scroll:focus-visible { outline: 2px solid var(--kf-action-primary); outline-offset: 4px; }
+        .statistics-page .table-scroll:focus-visible { outline: 2px solid var(--kf-text-primary); outline-offset: 4px; }
         .statistics-table { width: 100%; min-width: 900px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
         .statistics-table th, .statistics-table td { padding: 14px 16px; border-bottom: 1px solid var(--kf-border-default); text-align: left; vertical-align: top; }
         .statistics-table th { color: var(--kf-text-secondary); font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--kf-bg-surface); }
@@ -264,7 +264,7 @@
         const statisticsList = /*[[${statisticsList}]]*/ [];
         const rows = Array.isArray(statisticsList) ? statisticsList : [];
         const chartColor = getComputedStyle(document.documentElement)
-            .getPropertyValue('--kf-action-primary').trim() || '#C84B30';
+            .getPropertyValue('--kf-text-primary').trim() || '#23262F';
         const chartTextColor = '#5F6963';
         const chartGridColor = '#E9EAE5';
 
@@ -445,7 +445,7 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#1B2220',
+                            backgroundColor: '#23262F',
                             padding: 12,
                             callbacks: {
                                 label: context => {
@@ -591,7 +591,7 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#1B2220',
+                            backgroundColor: '#23262F',
                             padding: 12,
                             callbacks: {
                                 label: context => [

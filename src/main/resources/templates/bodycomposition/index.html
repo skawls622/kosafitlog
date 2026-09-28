@@ -29,7 +29,7 @@
         .measurement-form .form-control { min-width: 0; width: 100%; min-height: 54px; padding: 10px 42px 10px 12px; border-color: var(--kf-border-default); border-radius: 6px; background: var(--kf-bg-surface); color: var(--kf-text-primary); font-size: 23px; font-weight: 600; font-variant-numeric: tabular-nums; }
         .measurement-form input[type="date"] { padding: 10px 12px; font-size: 16px; font-weight: 500; }
         .measurement-form .form-control::placeholder { font-size: 14px; font-weight: 400; color: var(--kf-text-secondary); }
-        .measurement-form .form-control:focus-visible { outline: 2px solid var(--kf-action-primary); outline-offset: 3px; }
+        .measurement-form .form-control:focus-visible { outline: 2px solid var(--kf-text-primary); outline-offset: 3px; }
         .measurement-input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--kf-text-secondary); font-size: 13px; pointer-events: none; }
         .measurement-form .button-row { margin-top: 4px; }
         .measurement-form .btn { min-height: 50px; width: 100%; border-radius: 6px; font-size: 15px; }
@@ -41,7 +41,7 @@
         .measurement-reading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 16px; }
         .measurement-reading > div { min-width: 0; }
         .measurement-reading-label { margin: 0 0 4px; color: var(--kf-text-secondary); font-size: 12px; }
-        .measurement-reading-value { margin: 0; color: var(--kf-action-primary); font-size: clamp(38px, 5vw, 52px); font-weight: 650; line-height: 1.2; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .measurement-reading-value { margin: 0; color: var(--kf-text-primary); font-size: clamp(38px, 5vw, 52px); font-weight: 650; line-height: 1.2; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
         .measurement-reading-value span { margin-left: 6px; color: var(--kf-text-secondary); font-size: 14px; font-weight: 400; letter-spacing: 0; }
         .measurement-reading-date { margin: 6px 0 0; color: var(--kf-text-secondary); font-size: 12px; }
         .measurement-history-link { flex-shrink: 0; display: inline-flex; align-items: center; min-height: 44px; color: var(--kf-text-secondary); font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
@@ -218,7 +218,7 @@
 		<script th:inline="javascript">
 			const bodyCompositionList = /*[[${bodyCompositionList}]]*/[];
 			const chartColor = getComputedStyle(document.documentElement)
-				.getPropertyValue('--kf-action-primary').trim() || '#C84B30';
+				.getPropertyValue('--kf-text-primary').trim() || '#23262F';
 			const chartRows = Array.isArray(bodyCompositionList)
 				? [...bodyCompositionList].sort((a, b) =>
 					String(a.measuredDate).localeCompare(String(b.measuredDate)))
@@ -316,7 +316,7 @@
 						plugins: {
                             legend: {display: false},
 							tooltip: {
-                                backgroundColor: '#1B2220', padding: 12,
+                                backgroundColor: '#23262F', padding: 12,
 								callbacks: {
 									label: context => context.parsed.y + ' ' + metric.unit
 								}
